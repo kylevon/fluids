@@ -167,19 +167,19 @@ pub fn subtract(gl: &GL,
 pub fn boundary(gl: &GL,
     boundary_pass:  &render::RenderPass,
     delta_x:        f32, 
-    scale:          f32,
-    vector_field:              Rc<texture::Framebuffer>,
-    boundary: Rc<texture::Framebuffer>,
+    should_reflect: bool,
+    vector_field:   Rc<texture::Framebuffer>,
+    boundary:       Rc<texture::Framebuffer>,
     dst:            Rc<texture::Framebuffer>,
 ) -> (Rc<texture::Framebuffer>, Rc<texture::Framebuffer>) {
     dst.bind(&gl);
     boundary_pass.use_program(&gl);
 
     gl.uniform1f(boundary_pass.uniforms["delta_x"].as_ref(), delta_x);
-    gl.uniform1f(boundary_pass.uniforms["scale"].as_ref(), scale);
+    gl.uniform1i(boundary_pass.uniforms["should_reflect"].as_ref(), should_reflect as i32);
 
     gl.uniform1i(boundary_pass.uniforms["vector_field"].as_ref(), 0);
-    gl.uniform1i(boundary_pass.uniforms["boundary"].as_ref(), 0);
+    gl.uniform1i(boundary_pass.uniforms["boundary"].as_ref(), 1);
 
     gl.active_texture(GL::TEXTURE0);
     gl.bind_texture(GL::TEXTURE_2D, Some(vector_field.get_texture()));
