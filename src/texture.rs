@@ -403,6 +403,38 @@ pub fn make_waves_vector_field(width: f32, height: f32) -> Vec<f32> {
     data
 }
 
+pub fn make_tube_obstacles(width: f32, height: f32) -> Vec<f32> {
+    let mut data = Vec::with_capacity((width * height * 4.0) as usize);
+    for r in 0..(height as i32){
+        for c in 0..(width as i32) {    
+            if r == 0 {
+                data.push(0.0); 
+                data.push(1.0);  
+            }
+            else if r == (height as i32) - 1 {
+                data.push(0.0);
+                data.push(-1.0);
+            }
+            else if c == 0 {
+                data.push(1.0);
+                data.push(0.0);
+            }
+            else if c == (width as i32) {
+                data.push(-1.0);
+                data.push(0.0);
+            }
+            else {
+                data.push(0.0);
+                data.push(0.0);
+            }
+            data.push(0.0);
+            data.push(1.0);
+        }   
+    }
+
+    data
+}
+
 pub fn get_vector_field_with_value(val: i32, width: i32,  height: i32) -> Vec<f32> {
     if val == 1 {
         make_static_vector_field(width as f32, height as f32)

@@ -70,6 +70,9 @@ pub fn start() -> Result<(), JsValue> {
     let vector_field_select = document().get_element_by_id("vector_field_select").unwrap();
     let vector_field_select: web_sys::HtmlSelectElement = vector_field_select.dyn_into::<web_sys::HtmlSelectElement>()?;
 
+    let figure_select = document().get_element_by_id("figure_select").unwrap();
+    let figure_select: web_sys::HtmlSelectElement = figure_select.dyn_into::<web_sys::HtmlSelectElement>()?;
+
     let color_field_select = document().get_element_by_id("color_field_select").unwrap();
     let color_field_select: web_sys::HtmlSelectElement = color_field_select.dyn_into::<web_sys::HtmlSelectElement>()?;
 
@@ -126,7 +129,7 @@ pub fn start() -> Result<(), JsValue> {
 
     let boundary_pass = render::RenderPass::new(&gl,
         [&standard_vert_shader, &bound_frag_shader],
-        vec!["delta_x", "scale", "x"], "vertex_position",
+        vec!["delta_x", "scale", "vector_field", "boundary"], "vertex_position",
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
     )?;
 
@@ -156,12 +159,15 @@ pub fn start() -> Result<(), JsValue> {
 
     let vf_data = texture::make_waves_vector_field(width as f32, height as f32);
     let cb_data = texture::make_rainbow_array(width, height);
+    let obstacle_field_data = texture::make_tube_obstacles(width as f32, height as f32);
+    
 
     let mut cur_vector = 0;
     let mut cur_color = 0;
 
     let mut src_velocity_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, vf_data)?);
     let mut dst_velocity_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
+    let mut obstacle_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, obstacle_field_data)?);
 
     let mut src_pressure_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
     let mut dst_pressure_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
@@ -298,12 +304,12 @@ pub fn start() -> Result<(), JsValue> {
         {
             // boundary conditions
             let v_result = render_fluid::boundary(&gl, &boundary_pass, 
-                delta_x, -1.0, Rc::clone(&src_velocity_field), Rc::clone(&dst_velocity_field));
+                delta_x, -1.0, Rc::clone(&src_velocity_field), Rc::clone(&obstacle_field),Rc::clone(&dst_velocity_field));
             src_velocity_field = v_result.0;
             dst_velocity_field = v_result.1;
 
             let p_result = render_fluid::boundary(&gl, &boundary_pass, 
-                delta_x, 1.0, Rc::clone(&src_pressure_field), Rc::clone(&dst_pressure_field));
+                delta_x, 1.0, Rc::clone(&src_pressure_field), Rc::clone(&obstacle_field), Rc::clone(&dst_pressure_field));
                 src_pressure_field = p_result.0;
                 dst_pressure_field = p_result.1;
         }
