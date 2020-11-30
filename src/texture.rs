@@ -357,11 +357,18 @@ pub fn make_constant_vector_field(width: f32, height: f32) -> Vec<f32> {
     let mut data = Vec::with_capacity((width * height * 4.0) as usize);
 
     for _ in 0..(height as i32){
-        for _ in 0..(width as i32) {    
+        for c in 0..(width as i32) {
             let v = Vector3::new(1.0, 0.0, 0.0);
-            
-            data.push(v.x); 
-            data.push(v.y);  
+            if c == 0
+            {
+                data.push(v.x);
+                data.push(v.y);
+            }
+            else
+            {
+                data.push(0.0);
+                data.push(0.0);
+            }
             data.push(0.0);
             data.push(1.0);
         }   

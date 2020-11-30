@@ -73,8 +73,8 @@ pub fn start() -> Result<(), JsValue> {
     let figure_select = document().get_element_by_id("figure_select").unwrap();
     let figure_select: web_sys::HtmlSelectElement = figure_select.dyn_into::<web_sys::HtmlSelectElement>()?;
 
-    let color_field_select = document().get_element_by_id("color_field_select").unwrap();
-    let color_field_select: web_sys::HtmlSelectElement = color_field_select.dyn_into::<web_sys::HtmlSelectElement>()?;
+    let reset_flag_element = document().get_element_by_id("reset_flag").unwrap();
+    let reset_flag_element: web_sys::HtmlSelectElement = reset_flag_element.dyn_into::<web_sys::HtmlSelectElement>()?;
 
     let width: i32 = canvas.width() as i32;
     let height: i32 = canvas.height() as i32;
@@ -163,18 +163,18 @@ pub fn start() -> Result<(), JsValue> {
     
 
     let mut cur_vector = 0;
-    let mut cur_color = 0;
+    let mut cur_reset_flag = 0;
 
-    let mut src_velocity_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, vf_data)?);
+    let mut src_velocity_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, vf_data.clone())?);
     let mut dst_velocity_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
-    let mut obstacle_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, obstacle_field_data)?);
+    let mut obstacle_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, obstacle_field_data.clone())?);
 
     let mut src_pressure_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
     let mut dst_pressure_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
 
     let mut divergence_fb = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
 
-    let mut src_color_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, cb_data)?);
+    let mut src_color_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, cb_data.clone())?);
     let mut dst_color_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
 
     let rainbow_colors = texture::get_rainbow_array();
@@ -185,25 +185,19 @@ pub fn start() -> Result<(), JsValue> {
         let iter = jacobi_slider.value_as_number() as usize;
         let delta_t = 1.0/60.0;
 
-        let vector_field_select_value = vector_field_select.selected_index();
-        let color_field_select_value = color_field_select.selected_index();
-
-        if vector_field_select_value != cur_vector {
+        let reset_flag_value = reset_flag_element.selected_index();
+        
+        if reset_flag_value != cur_reset_flag 
+        {
+            src_color_field.delete_buffers(&gl);
             src_velocity_field.delete_buffers(&gl);
             src_pressure_field.delete_buffers(&gl);
-            let data = texture::get_vector_field_with_value(vector_field_select_value, width, height);
-            src_velocity_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, data).unwrap());
+
+            src_color_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, cb_data.clone()).unwrap());
+            src_velocity_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, vf_data.clone()).unwrap());
             src_pressure_field = Rc::new(texture::Framebuffer::new(&gl, width, height).unwrap());
 
-            cur_vector = vector_field_select_value;
-        }
-        
-        if color_field_select_value != cur_color {
-            src_color_field.delete_buffers(&gl);
-            let data = texture::get_color_field_with_value(color_field_select_value, width, height);
-            src_color_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, data).unwrap());
-
-            cur_color = color_field_select_value;
+            cur_reset_flag = reset_flag_value;
         }
 
         {
