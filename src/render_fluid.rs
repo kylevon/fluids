@@ -198,6 +198,41 @@ pub fn boundary(gl: &GL,
     (dst, vector_field)
 }
 
+pub fn pressure(gl: &GL,
+    pressure_pass:  &render::RenderPass,
+    velocity_field: Rc<texture::Framebuffer>,
+    pressure_grad:  Rc<texture::Framebuffer>,
+    pressure_field: Rc<texture::Framebuffer>,
+    dst:            Rc<texture::Framebuffer>,
+) -> (Rc<texture::Framebuffer>, Rc<texture::Framebuffer>) {
+    dst.bind(&gl);
+    pressure_pass.use_program(&gl);
+
+    gl.uniform1i(pressure_pass.uniforms["velocity_field"].as_ref(), 0);
+    gl.uniform1i(pressure_pass.uniforms["pressure_gradient"].as_ref(), 1);
+    gl.uniform1i(pressure_pass.uniforms["pressure_field"].as_ref(), 2);
+
+    gl.active_texture(GL::TEXTURE0);
+    gl.bind_texture(GL::TEXTURE_2D, Some(velocity_field.get_texture()));
+
+    gl.active_texture(GL::TEXTURE1);
+    gl.bind_texture(GL::TEXTURE_2D, Some(pressure_grad.get_texture()));
+
+    gl.active_texture(GL::TEXTURE2);
+    gl.bind_texture(GL::TEXTURE_2D, Some(pressure_field.get_texture()));
+
+    gl.bind_buffer(GL::ARRAY_BUFFER, Some(&pressure_pass.vertex_buffer));
+    gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);
+    gl.enable_vertex_attrib_array(0);
+
+    gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&pressure_pass.index_buffer));
+
+    gl.draw_elements_with_i32(GL::TRIANGLES, 6, GL::UNSIGNED_SHORT, 0);
+    dst.unbind(&gl);
+
+    (dst, pressure_field)
+}
+
 pub fn force(gl: &GL,
     force_pass:  &render::RenderPass,
     delta_t:        f32, 

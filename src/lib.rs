@@ -93,6 +93,7 @@ pub fn start() -> Result<(), JsValue> {
     let divergence_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::DIVERGE_FRAGMENT_SHADER)?;
     let subtract_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::SUB_FRAGMENT_SHADER)?;
     let bound_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::BOUND_FRAGMENT_SHADER)?;
+    let press_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::PRESS_FRAGMENT_SHADER)?;
     let force_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::FORCE_FRAGMENT_SHADER)?;
     let color_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::COLOR_FRAGMENT_SHADER)?;
     let vorticity_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::VORT_FRAGMENT_SHADER)?;
@@ -133,6 +134,12 @@ pub fn start() -> Result<(), JsValue> {
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
     )?;
 
+    let pressure_pass = render::RenderPass::new(&gl,
+        [&standard_vert_shader, &press_frag_shader],
+        vec!["velocity_field", "pressure_gradient", "pressure_field"], "vertex_position",
+        &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
+    )?;
+
     let force_pass = render::RenderPass::new(&gl,
         [&standard_vert_shader, &force_frag_shader],
         vec!["delta_t", "rho", "force", "impulse_pos", "velocity_field_texture"], "vertex_position",
@@ -166,7 +173,11 @@ pub fn start() -> Result<(), JsValue> {
 
     let mut src_velocity_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, vf_data.clone())?);
     let mut dst_velocity_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
+
     let obstacle_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, obstacle_field_data.clone())?);
+
+    let mut src_pressure_grad_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
+    let mut dst_pressure_grad_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
 
     let mut src_pressure_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
     let mut dst_pressure_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
@@ -190,11 +201,11 @@ pub fn start() -> Result<(), JsValue> {
         {
             src_color_field.delete_buffers(&gl);
             src_velocity_field.delete_buffers(&gl);
-            src_pressure_field.delete_buffers(&gl);
+            src_pressure_grad_field.delete_buffers(&gl);
 
             src_color_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, cb_data.clone()).unwrap());
             src_velocity_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, vf_data.clone()).unwrap());
-            src_pressure_field = Rc::new(texture::Framebuffer::new(&gl, width, height).unwrap());
+            src_pressure_grad_field = Rc::new(texture::Framebuffer::new(&gl, width, height).unwrap());
 
             cur_reset_flag = reset_flag_value;
         }
@@ -268,7 +279,7 @@ pub fn start() -> Result<(), JsValue> {
         }
 
         {
-            // compute pressure 
+            // compute pressure gradient
             divergence_fb = render_fluid::divergence(&gl, &divergence_pass, 
                 delta_x, &src_velocity_field, Rc::clone(&divergence_fb));
 
@@ -277,17 +288,17 @@ pub fn start() -> Result<(), JsValue> {
 
             let result = render_fluid::jacobi_method(&gl, &jacobi_pass, iter, 
                 delta_x, alpha, r_beta, 
-                Rc::clone(&src_pressure_field), &divergence_fb, Rc::clone(&dst_pressure_field));
+                Rc::clone(&src_pressure_grad_field), &divergence_fb, Rc::clone(&dst_pressure_grad_field));
 
-            src_pressure_field = result.0;
-            dst_pressure_field = result.1;
+            src_pressure_grad_field = result.0;
+            dst_pressure_grad_field = result.1;
 
         }
 
         {
             // gradient subtraction
             let result = render_fluid::subtract(&gl, &subtract_pass, 
-                delta_x, &src_pressure_field, 
+                delta_x, &src_pressure_grad_field,
                 Rc::clone(&src_velocity_field), Rc::clone(&dst_velocity_field));
                 
             src_velocity_field = result.0;
@@ -302,9 +313,9 @@ pub fn start() -> Result<(), JsValue> {
             dst_velocity_field = v_result.1;
 
             let p_result = render_fluid::boundary(&gl, &boundary_pass, 
-                delta_x, false, Rc::clone(&src_pressure_field), Rc::clone(&obstacle_field), Rc::clone(&dst_pressure_field));
-                src_pressure_field = p_result.0;
-                dst_pressure_field = p_result.1;
+                delta_x, false, Rc::clone(&src_pressure_grad_field), Rc::clone(&obstacle_field), Rc::clone(&dst_pressure_grad_field));
+                src_pressure_grad_field = p_result.0;
+                dst_pressure_grad_field = p_result.1;
         }
 
         {   
@@ -328,6 +339,17 @@ pub fn start() -> Result<(), JsValue> {
             dst_color_field = result.1;
         }
 
+        {
+            // update pressure field
+            let result = render_fluid::pressure(&gl, &pressure_pass,
+                Rc::clone(&src_velocity_field),
+                Rc::clone(&src_pressure_grad_field),
+                Rc::clone(&src_pressure_field),
+                Rc::clone(&dst_pressure_field));
+
+            src_pressure_field = result.0;
+            dst_pressure_field = result.1;
+        }
         
         {   
             // render texture to screen 
