@@ -68,10 +68,10 @@ pub fn start() -> Result<(), JsValue> {
     let vorticity_slider: web_sys::HtmlInputElement = vorticity_slider.dyn_into::<web_sys::HtmlInputElement>()?;
 
     let vector_field_select = document().get_element_by_id("vector_field_select").unwrap();
-    let vector_field_select: web_sys::HtmlSelectElement = vector_field_select.dyn_into::<web_sys::HtmlSelectElement>()?;
+    let _vector_field_select: web_sys::HtmlSelectElement = vector_field_select.dyn_into::<web_sys::HtmlSelectElement>()?;
 
     let figure_select = document().get_element_by_id("figure_select").unwrap();
-    let figure_select: web_sys::HtmlSelectElement = figure_select.dyn_into::<web_sys::HtmlSelectElement>()?;
+    let _figure_select: web_sys::HtmlSelectElement = figure_select.dyn_into::<web_sys::HtmlSelectElement>()?;
 
     let reset_flag_element = document().get_element_by_id("reset_flag").unwrap();
     let reset_flag_element: web_sys::HtmlSelectElement = reset_flag_element.dyn_into::<web_sys::HtmlSelectElement>()?;

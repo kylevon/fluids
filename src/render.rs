@@ -20,7 +20,7 @@ pub struct RenderPass<'a> {
     pub uniforms:       HashMap<&'a str, Option<WebGlUniformLocation>>,
     pub vertex_buffer:  WebGlBuffer,
     pub index_buffer:   WebGlBuffer,
-    attrib_location:    i32,
+    _attrib_location:    i32,
 }
 
 impl RenderPass<'_> {
@@ -50,7 +50,7 @@ impl RenderPass<'_> {
             uniforms: uniform_map,
             vertex_buffer: v_buffer,
             index_buffer: i_buffer,
-            attrib_location: a_loc,
+            _attrib_location: a_loc,
         })
     }
 

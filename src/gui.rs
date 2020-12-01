@@ -4,7 +4,7 @@ use wasm_bindgen::prelude::*;
 use std::rc::Rc;
 use std::cell::RefCell; 
 
-use crate::log;
+// use crate::log;
 
 pub struct Gui {
     pub mouse_pressed: bool,

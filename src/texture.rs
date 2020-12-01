@@ -7,11 +7,11 @@ use palette::rgb::Rgb;
 use palette::encoding::srgb::Srgb;
 
 use std::f32;
-use std::f32::consts::PI;
+// use std::f32::consts::PI;
 
 pub struct Framebuffer{
-    w_: i32, 
-    h_: i32,
+    _w_: i32, 
+    _h_: i32,
     fb_: WebGlFramebuffer,
     c_: WebGlTexture,
 }
@@ -31,8 +31,8 @@ impl Framebuffer {
         gl.bind_framebuffer(GL::FRAMEBUFFER, None);
 
         Ok(Framebuffer {
-            w_: width, 
-            h_: height, 
+            _w_: width, 
+            _h_: height, 
             fb_: fb,
             c_: c,
         })
@@ -54,8 +54,8 @@ impl Framebuffer {
         gl.bind_framebuffer(GL::FRAMEBUFFER, None);
 
         Ok(Framebuffer {
-            w_: width, 
-            h_: height, 
+            _w_: width, 
+            _h_: height, 
             fb_: fb,
             c_: texture,
         })
@@ -201,7 +201,7 @@ pub fn make_constant_vector_field(width: f32, height: f32) -> Vec<f32> {
 pub fn make_tube_obstacles(width: f32, height: f32) -> Vec<f32> {
     let mut data = Vec::with_capacity((width * height * 4.0) as usize);
     for r in 0..(height as i32){
-        for c in 0..(width as i32) {    
+        for _c in 0..(width as i32) {    
             if r == 0 {
                 data.push(0.0); 
                 data.push(1.0);  
