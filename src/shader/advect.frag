@@ -8,9 +8,9 @@ varying vec2 UV;
 
 void main() {
     vec2 u = texture2D(vec_field_texture, UV).xy;
-    vec2 pastCoord = UV - (0.5 * delta_t * u); 
+    vec2 pastCoord = UV - (0.5 * delta_t * u);
 
-    gl_FragColor = texture2D(color_field_texture, pastCoord); 
+    gl_FragColor = texture2D(color_field_texture, pastCoord);
 }
 
 

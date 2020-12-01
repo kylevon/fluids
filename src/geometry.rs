@@ -11,7 +11,7 @@ pub static QUAD_VERTICES: [f32; 12] = [
 ];
 
 pub static QUAD_INDICES: [u16; 6] = [
-    0,  1,  2,      
+    0,  1,  2,
     0,  2,  3,
 ];
 
@@ -19,12 +19,12 @@ pub fn make_vertex_buffer(gl: &GL, data: &[f32]) -> Result<WebGlBuffer, JsValue>
     let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
     gl.bind_buffer(GL::ARRAY_BUFFER, Some(&buffer));
 
-    unsafe { 
+    unsafe {
         let vert_array = js_sys::Float32Array::view(data);
 
         gl.buffer_data_with_array_buffer_view(
-            GL::ARRAY_BUFFER, 
-            &vert_array, 
+            GL::ARRAY_BUFFER,
+            &vert_array,
             GL::STATIC_DRAW,
         );
     }

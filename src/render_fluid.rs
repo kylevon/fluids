@@ -1,7 +1,7 @@
 use web_sys::WebGlRenderingContext as GL;
 use nalgebra::{Vector2, Vector3};
 
-use crate::render; 
+use crate::render;
 use crate::texture;
 
 use std::rc::Rc;
@@ -19,8 +19,8 @@ pub fn advection(gl: &GL,
 
     advect_pass.use_program(&gl);
 
-    gl.uniform1f(advect_pass.uniforms["delta_x"].as_ref(), delta_x); 
-    gl.uniform1f(advect_pass.uniforms["delta_t"].as_ref(), delta_t); 
+    gl.uniform1f(advect_pass.uniforms["delta_x"].as_ref(), delta_x);
+    gl.uniform1f(advect_pass.uniforms["delta_t"].as_ref(), delta_t);
     gl.uniform1i(advect_pass.uniforms["color_field_texture"].as_ref(), 0);
     gl.uniform1i(advect_pass.uniforms["vec_field_texture"].as_ref(), 1);
 
@@ -32,8 +32,8 @@ pub fn advection(gl: &GL,
 
     gl.bind_buffer(GL::ARRAY_BUFFER, Some(&advect_pass.vertex_buffer));
     gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);
-    gl.enable_vertex_attrib_array(0); 
-    
+    gl.enable_vertex_attrib_array(0);
+
     gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&advect_pass.index_buffer));
 
     gl.draw_elements_with_i32(GL::TRIANGLES, 6, GL::UNSIGNED_SHORT, 0);
@@ -45,10 +45,10 @@ pub fn advection(gl: &GL,
 pub fn jacobi_method(gl: &GL,
     jacobi_pass:    &render::RenderPass,
     iter:           usize,
-    delta_x:        f32, 
-    alpha:          f32, 
-    r_beta:         f32, 
-    x:              Rc<texture::Framebuffer>, 
+    delta_x:        f32,
+    alpha:          f32,
+    r_beta:         f32,
+    x:              Rc<texture::Framebuffer>,
     b:              &texture::Framebuffer,
     dst:            Rc<texture::Framebuffer>,
 ) -> (Rc<texture::Framebuffer>, Rc<texture::Framebuffer>)
@@ -59,22 +59,22 @@ pub fn jacobi_method(gl: &GL,
         let j_dst = bufs[(k + 1) % 2];
 
         j_dst.bind(&gl);
-        jacobi_iteration(&gl, &jacobi_pass, delta_x, alpha, r_beta, &j_source, &b);            
+        jacobi_iteration(&gl, &jacobi_pass, delta_x, alpha, r_beta, &j_source, &b);
         j_dst.unbind(&gl);
     }
-    
+
     // lazy code: essentially we do jacobi `iter-1` or `iter` iterations
     (x, dst)
 }
 
-pub fn jacobi_iteration(gl: &GL, 
+pub fn jacobi_iteration(gl: &GL,
     jacobi_pass:    &render::RenderPass,
-    delta_x:        f32, 
-    alpha:          f32, 
-    r_beta:         f32, 
-    x:              &texture::Framebuffer, 
+    delta_x:        f32,
+    alpha:          f32,
+    r_beta:         f32,
+    x:              &texture::Framebuffer,
     b:              &texture::Framebuffer,
-) 
+)
 {
     render::clear_framebuffer(&gl);
     jacobi_pass.use_program(&gl);
@@ -82,7 +82,7 @@ pub fn jacobi_iteration(gl: &GL,
     gl.uniform1f(jacobi_pass.uniforms["delta_x"].as_ref(), delta_x);
     gl.uniform1f(jacobi_pass.uniforms["alpha"].as_ref(), alpha);
     gl.uniform1f(jacobi_pass.uniforms["r_beta"].as_ref(), r_beta);
-    
+
     gl.uniform1i(jacobi_pass.uniforms["x"].as_ref(), 0);
     gl.uniform1i(jacobi_pass.uniforms["b"].as_ref(), 1);
 
@@ -94,8 +94,8 @@ pub fn jacobi_iteration(gl: &GL,
 
     gl.bind_buffer(GL::ARRAY_BUFFER, Some(&jacobi_pass.vertex_buffer));
     gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);
-    gl.enable_vertex_attrib_array(0); 
-    
+    gl.enable_vertex_attrib_array(0);
+
     gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&jacobi_pass.index_buffer));
 
     gl.draw_elements_with_i32(GL::TRIANGLES, 6, GL::UNSIGNED_SHORT, 0);
@@ -104,7 +104,7 @@ pub fn jacobi_iteration(gl: &GL,
 
 pub fn divergence(gl: &GL,
     divergence_pass:    &render::RenderPass,
-    delta_x:            f32, 
+    delta_x:            f32,
     w:                  &texture::Framebuffer,
     dst:                Rc<texture::Framebuffer>,
 ) -> Rc<texture::Framebuffer> {
@@ -121,8 +121,8 @@ pub fn divergence(gl: &GL,
 
     gl.bind_buffer(GL::ARRAY_BUFFER, Some(&divergence_pass.vertex_buffer));
     gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);
-    gl.enable_vertex_attrib_array(0); 
-    
+    gl.enable_vertex_attrib_array(0);
+
     gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&divergence_pass.index_buffer));
 
     gl.draw_elements_with_i32(GL::TRIANGLES, 6, GL::UNSIGNED_SHORT, 0);
@@ -133,10 +133,10 @@ pub fn divergence(gl: &GL,
 
 pub fn subtract(gl: &GL,
     subtract_pass:  &render::RenderPass,
-    delta_x:        f32, 
+    delta_x:        f32,
     p:              &texture::Framebuffer,
     w:              Rc<texture::Framebuffer>,
-    dst:            Rc<texture::Framebuffer>, 
+    dst:            Rc<texture::Framebuffer>,
 ) -> (Rc<texture::Framebuffer>, Rc<texture::Framebuffer>) {
     dst.bind(&gl);
     render::clear_framebuffer(&gl);
@@ -154,8 +154,8 @@ pub fn subtract(gl: &GL,
 
     gl.bind_buffer(GL::ARRAY_BUFFER, Some(&subtract_pass.vertex_buffer));
     gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);
-    gl.enable_vertex_attrib_array(0); 
-    
+    gl.enable_vertex_attrib_array(0);
+
     gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&subtract_pass.index_buffer));
 
     gl.draw_elements_with_i32(GL::TRIANGLES, 6, GL::UNSIGNED_SHORT, 0);
@@ -166,7 +166,7 @@ pub fn subtract(gl: &GL,
 
 pub fn boundary(gl: &GL,
     boundary_pass:  &render::RenderPass,
-    delta_x:        f32, 
+    delta_x:        f32,
     should_reflect: bool,
     vector_field:   Rc<texture::Framebuffer>,
     boundary:       Rc<texture::Framebuffer>,
@@ -188,8 +188,8 @@ pub fn boundary(gl: &GL,
 
     gl.bind_buffer(GL::ARRAY_BUFFER, Some(&boundary_pass.vertex_buffer));
     gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);
-    gl.enable_vertex_attrib_array(0); 
-    
+    gl.enable_vertex_attrib_array(0);
+
     gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&boundary_pass.index_buffer));
 
     gl.draw_elements_with_i32(GL::TRIANGLES, 6, GL::UNSIGNED_SHORT, 0);
@@ -235,13 +235,13 @@ pub fn pressure(gl: &GL,
 
 pub fn force(gl: &GL,
     force_pass:  &render::RenderPass,
-    delta_t:        f32, 
+    delta_t:        f32,
     rho:            f32,
     force:          &Vector2<f32>,
     impulse_pos:    &Vector2<f32>,
     velocity_field_texture:     Rc<texture::Framebuffer>,
     dst:                        Rc<texture::Framebuffer>,
-) -> (Rc<texture::Framebuffer>, Rc<texture::Framebuffer>) 
+) -> (Rc<texture::Framebuffer>, Rc<texture::Framebuffer>)
 {
     dst.bind(&gl);
     force_pass.use_program(&gl);
@@ -258,8 +258,8 @@ pub fn force(gl: &GL,
 
     gl.bind_buffer(GL::ARRAY_BUFFER, Some(&force_pass.vertex_buffer));
     gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);
-    gl.enable_vertex_attrib_array(0); 
-    
+    gl.enable_vertex_attrib_array(0);
+
     gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&force_pass.index_buffer));
 
     gl.draw_elements_with_i32(GL::TRIANGLES, 6, GL::UNSIGNED_SHORT, 0);
@@ -270,13 +270,13 @@ pub fn force(gl: &GL,
 
 pub fn color(gl: &GL,
     force_pass:  &render::RenderPass,
-    delta_t:        f32, 
+    delta_t:        f32,
     rho:            f32,
     color:          &Vector3<f32>,
     impulse_pos:    &Vector2<f32>,
     color_field_texture:     Rc<texture::Framebuffer>,
     dst:                        Rc<texture::Framebuffer>,
-) -> (Rc<texture::Framebuffer>, Rc<texture::Framebuffer>) 
+) -> (Rc<texture::Framebuffer>, Rc<texture::Framebuffer>)
 {
     dst.bind(&gl);
     force_pass.use_program(&gl);
@@ -293,8 +293,8 @@ pub fn color(gl: &GL,
 
     gl.bind_buffer(GL::ARRAY_BUFFER, Some(&force_pass.vertex_buffer));
     gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);
-    gl.enable_vertex_attrib_array(0); 
-    
+    gl.enable_vertex_attrib_array(0);
+
     gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&force_pass.index_buffer));
 
     gl.draw_elements_with_i32(GL::TRIANGLES, 6, GL::UNSIGNED_SHORT, 0);
@@ -304,13 +304,13 @@ pub fn color(gl: &GL,
 }
 
 pub fn vorticity_confinement(gl: &GL,
-    vorticity_pass: &render::RenderPass, 
+    vorticity_pass: &render::RenderPass,
     delta_t:    f32,
-    delta_x:    f32, 
-    vorticity:  f32, 
+    delta_x:    f32,
+    vorticity:  f32,
     v :         Rc<texture::Framebuffer>,
     dst:        Rc<texture::Framebuffer>,
-) -> (Rc<texture::Framebuffer>, Rc<texture::Framebuffer>) 
+) -> (Rc<texture::Framebuffer>, Rc<texture::Framebuffer>)
 {
     dst.bind(&gl);
     vorticity_pass.use_program(&gl);
@@ -322,11 +322,11 @@ pub fn vorticity_confinement(gl: &GL,
 
     gl.active_texture(GL::TEXTURE0);
     gl.bind_texture(GL::TEXTURE_2D, Some(v.get_texture()));
-    
+
     gl.bind_buffer(GL::ARRAY_BUFFER, Some(&vorticity_pass.vertex_buffer));
     gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);
-    gl.enable_vertex_attrib_array(0); 
-    
+    gl.enable_vertex_attrib_array(0);
+
     gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&vorticity_pass.index_buffer));
 
     gl.draw_elements_with_i32(GL::TRIANGLES, 6, GL::UNSIGNED_SHORT, 0);

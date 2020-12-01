@@ -14,7 +14,7 @@ pub fn clear_framebuffer(gl: &GL) {
     gl.depth_func(GL::LEQUAL);
     gl.clear(GL::COLOR_BUFFER_BIT | GL::DEPTH_BUFFER_BIT);
 }
- 
+
 pub struct RenderPass<'a> {
     shader_progam:      WebGlProgram,
     pub uniforms:       HashMap<&'a str, Option<WebGlUniformLocation>>,
@@ -25,10 +25,10 @@ pub struct RenderPass<'a> {
 
 impl RenderPass<'_> {
     pub fn new<'a>(
-        gl:             &GL, 
-        shaders:        [&WebGlShader; 2], 
+        gl:             &GL,
+        shaders:        [&WebGlShader; 2],
         uniform_names:  Vec<&'a str>,
-        attrib_name:    &str, 
+        attrib_name:    &str,
         vertices:       &[f32],
         indices:        &[u16],
     ) -> Result<RenderPass<'a>, JsValue>
@@ -46,7 +46,7 @@ impl RenderPass<'_> {
         let a_loc = gl.get_attrib_location(&program, attrib_name);
 
         Ok(RenderPass {
-            shader_progam: program, 
+            shader_progam: program,
             uniforms: uniform_map,
             vertex_buffer: v_buffer,
             index_buffer: i_buffer,

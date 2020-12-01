@@ -12,7 +12,7 @@ use web_sys::WebGlRenderingContext as GL;
 
 use nalgebra::Vector3;
 
-use std::cell::RefCell; 
+use std::cell::RefCell;
 use std::rc::Rc;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -45,7 +45,7 @@ fn document() -> web_sys::Document {
 pub fn start() -> Result<(), JsValue> {
     utils::set_panic_hook(); // this allows us to get more detailed information from rust runtime errors
 
-    // setup webgl canvas 
+    // setup webgl canvas
     let canvas = document().get_element_by_id("canvas").unwrap();
     let canvas: web_sys::HtmlCanvasElement = canvas.dyn_into::<web_sys::HtmlCanvasElement>()?;
 
@@ -98,7 +98,7 @@ pub fn start() -> Result<(), JsValue> {
     let color_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::COLOR_FRAGMENT_SHADER)?;
     let vorticity_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::VORT_FRAGMENT_SHADER)?;
 
-    let advect_pass = render::RenderPass::new(&gl, 
+    let advect_pass = render::RenderPass::new(&gl,
         [&standard_vert_shader, &advect_frag_shader],
         vec!["delta_x", "vec_field_texture",  "color_field_texture", "delta_t"], "vertex_position",
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
@@ -110,13 +110,13 @@ pub fn start() -> Result<(), JsValue> {
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
     )?;
 
-    let jacobi_pass = render::RenderPass::new(&gl, 
+    let jacobi_pass = render::RenderPass::new(&gl,
         [&standard_vert_shader, &jacobi_frag_shader],
         vec!["delta_x", "alpha", "r_beta", "x", "b"], "vertex_position",
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
     )?;
 
-    let divergence_pass = render::RenderPass::new(&gl, 
+    let divergence_pass = render::RenderPass::new(&gl,
         [&standard_vert_shader, &divergence_frag_shader],
         vec!["delta_x", "w"], "vertex_position",
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
@@ -152,22 +152,22 @@ pub fn start() -> Result<(), JsValue> {
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
     )?;
 
-    let vorticity_pass = render::RenderPass::new(&gl, 
+    let vorticity_pass = render::RenderPass::new(&gl,
         [&standard_vert_shader, &vorticity_frag_shader],
-        vec!["delta_t", "delta_x", "vorticity", "v"], "vertex_position", 
+        vec!["delta_t", "delta_x", "vorticity", "v"], "vertex_position",
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
     )?;
 
-    // RenderLoop 
+    // RenderLoop
     let f = Rc::new(RefCell::new(None));
-    let g = f.clone(); 
+    let g = f.clone();
 
     let delta_x = 1.0/width as f32;
 
     let vf_data = texture::make_constant_vector_field(width as f32, height as f32);
     let cb_data = texture::make_checkerboard_array(width, height);
     let obstacle_field_data = texture::make_tube_obstacles(width as f32, height as f32);
-    
+
 
     let mut cur_reset_flag = 0;
 
@@ -189,15 +189,15 @@ pub fn start() -> Result<(), JsValue> {
 
     let rainbow_colors = texture::get_rainbow_array();
 
-    let mainloop: Box<dyn FnMut(i32)> = Box::new(move |now| { 
+    let mainloop: Box<dyn FnMut(i32)> = Box::new(move |now| {
         let gui = gui.borrow();
 
         let iter = jacobi_slider.value_as_number() as usize;
         let delta_t = 1.0/60.0;
 
         let reset_flag_value = reset_flag_element.selected_index();
-        
-        if reset_flag_value != cur_reset_flag 
+
+        if reset_flag_value != cur_reset_flag
         {
             src_color_field.delete_buffers(&gl);
             src_velocity_field.delete_buffers(&gl);
@@ -213,9 +213,9 @@ pub fn start() -> Result<(), JsValue> {
         {
             // advect vector field
             let result = render_fluid::advection(&gl, &advect_pass,
-                delta_x, delta_t,  
+                delta_x, delta_t,
                 Rc::clone(&src_velocity_field), &src_velocity_field, Rc::clone(&dst_velocity_field));
-            
+
             src_velocity_field = result.0;
             dst_velocity_field = result.1; // rust does not have destructuring assignment yet https://github.com/rust-lang/rfcs/issues/372
         }
@@ -232,7 +232,7 @@ pub fn start() -> Result<(), JsValue> {
                 let j_dst = bufs[(k + 1) % 2];
 
                 j_dst.bind(&gl);
-                render_fluid::jacobi_iteration(&gl, &jacobi_pass, delta_x, alpha, r_beta, &j_source, &j_source);            
+                render_fluid::jacobi_iteration(&gl, &jacobi_pass, delta_x, alpha, r_beta, &j_source, &j_source);
                 j_dst.unbind(&gl);
             }
         }
@@ -245,9 +245,9 @@ pub fn start() -> Result<(), JsValue> {
                 let force = speed * gui.mouse_vec;
                 let impulse_pos = gui.mouse_pos;
                 let result = render_fluid::force(&gl, &force_pass,
-                    delta_t, rho, &force, &impulse_pos,  
+                    delta_t, rho, &force, &impulse_pos,
                     Rc::clone(&src_velocity_field), Rc::clone(&dst_velocity_field));
-                
+
                 src_velocity_field = result.0;
                 dst_velocity_field = result.1;
 
@@ -258,7 +258,7 @@ pub fn start() -> Result<(), JsValue> {
                 let mut r = color_hex[0] as f32 / 255.0;
                 let mut g = color_hex[1] as f32 / 255.0;
                 let mut b = color_hex[2] as f32 / 255.0;
-                
+
                 if rand_checked {
                     let now_sec = now as f32 * 0.25;
                     let rand_color = rainbow_colors[(now_sec % rainbow_colors.len() as f32) as usize];
@@ -270,9 +270,9 @@ pub fn start() -> Result<(), JsValue> {
                 let col = Vector3::new(r, g, b);
 
                 let result = render_fluid::color(&gl, &color_pass,
-                    delta_t, rho, &col, &impulse_pos,  
+                    delta_t, rho, &col, &impulse_pos,
                     Rc::clone(&src_color_field), Rc::clone(&dst_color_field));
-                
+
                 src_color_field = result.0;
                 dst_color_field = result.1;
             }
@@ -280,14 +280,14 @@ pub fn start() -> Result<(), JsValue> {
 
         {
             // compute pressure gradient
-            divergence_fb = render_fluid::divergence(&gl, &divergence_pass, 
+            divergence_fb = render_fluid::divergence(&gl, &divergence_pass,
                 delta_x, &src_velocity_field, Rc::clone(&divergence_fb));
 
-            let alpha   = -(delta_x.powf(2.0));    
+            let alpha   = -(delta_x.powf(2.0));
             let r_beta  = 0.25;
 
-            let result = render_fluid::jacobi_method(&gl, &jacobi_pass, iter, 
-                delta_x, alpha, r_beta, 
+            let result = render_fluid::jacobi_method(&gl, &jacobi_pass, iter,
+                delta_x, alpha, r_beta,
                 Rc::clone(&src_pressure_grad_field), &divergence_fb, Rc::clone(&dst_pressure_grad_field));
 
             src_pressure_grad_field = result.0;
@@ -297,44 +297,44 @@ pub fn start() -> Result<(), JsValue> {
 
         {
             // gradient subtraction
-            let result = render_fluid::subtract(&gl, &subtract_pass, 
+            let result = render_fluid::subtract(&gl, &subtract_pass,
                 delta_x, &src_pressure_grad_field,
                 Rc::clone(&src_velocity_field), Rc::clone(&dst_velocity_field));
-                
+
             src_velocity_field = result.0;
             dst_velocity_field = result.1;
         }
 
         {
             // boundary conditions
-            let v_result = render_fluid::boundary(&gl, &boundary_pass, 
+            let v_result = render_fluid::boundary(&gl, &boundary_pass,
                 delta_x, true, Rc::clone(&src_velocity_field), Rc::clone(&obstacle_field),Rc::clone(&dst_velocity_field));
             src_velocity_field = v_result.0;
             dst_velocity_field = v_result.1;
 
-            let p_result = render_fluid::boundary(&gl, &boundary_pass, 
+            let p_result = render_fluid::boundary(&gl, &boundary_pass,
                 delta_x, false, Rc::clone(&src_pressure_grad_field), Rc::clone(&obstacle_field), Rc::clone(&dst_pressure_grad_field));
                 src_pressure_grad_field = p_result.0;
                 dst_pressure_grad_field = p_result.1;
         }
 
-        {   
+        {
             let vorticity = vorticity_slider.value_as_number() as f32;
-            let result = render_fluid::vorticity_confinement(&gl, &vorticity_pass, 
-                delta_t, delta_x, vorticity, 
+            let result = render_fluid::vorticity_confinement(&gl, &vorticity_pass,
+                delta_t, delta_x, vorticity,
                 Rc::clone(&src_velocity_field), Rc::clone(&dst_velocity_field));
-            
+
             src_velocity_field = result.0;
             dst_velocity_field = result.1;
-            
+
         }
 
         {
             // advect color field
             let result = render_fluid::advection(&gl, &advect_pass,
-                 delta_x, delta_t, 
+                 delta_x, delta_t,
                  Rc::clone(&src_color_field), &src_velocity_field, Rc::clone(&dst_color_field));
-            
+
             src_color_field = result.0;
             dst_color_field = result.1;
         }
@@ -350,26 +350,26 @@ pub fn start() -> Result<(), JsValue> {
             src_pressure_field = result.0;
             dst_pressure_field = result.1;
         }
-        
-        {   
-            // render texture to screen 
+
+        {
+            // render texture to screen
             render::clear_framebuffer(&gl);
 
             quad_pass.use_program(&gl);
             gl.uniform1i(quad_pass.uniforms["qtexture"].as_ref(), 0);
-            
+
             gl.active_texture(GL::TEXTURE0);
             gl.bind_texture(GL::TEXTURE_2D, Some(src_color_field.get_texture()));
 
             gl.bind_buffer(GL::ARRAY_BUFFER, Some(&quad_pass.vertex_buffer));
             gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);
-            gl.enable_vertex_attrib_array(0); 
-            
+            gl.enable_vertex_attrib_array(0);
+
             gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&quad_pass.index_buffer));
 
             gl.draw_elements_with_i32(GL::TRIANGLES, 6, GL::UNSIGNED_SHORT, 0);
         }
-        
+
         request_animation_frame(f.borrow().as_ref().unwrap());
     });
 

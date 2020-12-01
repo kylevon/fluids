@@ -2,18 +2,18 @@ use nalgebra::Vector2;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
 use std::rc::Rc;
-use std::cell::RefCell; 
+use std::cell::RefCell;
 
 // use crate::log;
 
 pub struct Gui {
     pub mouse_pressed: bool,
 
-    pub mouse_pos: Vector2<f32>, 
+    pub mouse_pos: Vector2<f32>,
     pub mouse_vec: Vector2<f32>,
 
-    pub width: f32, 
-    pub height: f32, 
+    pub width: f32,
+    pub height: f32,
 
     pub j_iter: i32,
 }
@@ -22,11 +22,11 @@ pub struct Gui {
 impl Gui {
     pub fn new(width: f32, height: f32) -> Gui {
         Gui {
-            mouse_pressed: false, 
+            mouse_pressed: false,
             mouse_pos: Vector2::new(0.0, 0.0),
-            mouse_vec: Vector2::new(0.0, 0.0), 
+            mouse_vec: Vector2::new(0.0, 0.0),
             width: width,
-            height: height, 
+            height: height,
             j_iter: 20,
         }
     }
@@ -56,9 +56,9 @@ impl Gui {
 
 fn attach_mouse_down_handler(canvas: &web_sys::HtmlCanvasElement, gui: Rc<RefCell<Gui>>, offset_left: f32, offset_top: f32) -> Result<(), JsValue> {
     let handler: Box<dyn FnMut(_)> = Box::new(move |event: web_sys::MouseEvent| {
-        let x = event.client_x() as f32 - offset_left; 
+        let x = event.client_x() as f32 - offset_left;
         let y = event.client_y() as f32 - offset_top;
-        
+
         gui.borrow_mut().set_mouse_down(x, y);
     });
 
@@ -71,16 +71,16 @@ fn attach_mouse_down_handler(canvas: &web_sys::HtmlCanvasElement, gui: Rc<RefCel
 
 fn attach_mouse_move_handler(canvas: &web_sys::HtmlCanvasElement, gui: Rc<RefCell<Gui>>, offset_left: f32, offset_top: f32) -> Result<(), JsValue> {
     let handler: Box<dyn FnMut(_)> = Box::new(move |event: web_sys::MouseEvent| {
-        let x = event.client_x() as f32 - offset_left; 
+        let x = event.client_x() as f32 - offset_left;
         let y = event.client_y() as f32 - offset_top;
-    
-        gui.borrow_mut().set_mouse_move(x, y); 
+
+        gui.borrow_mut().set_mouse_move(x, y);
     });
 
 
     let handler = Closure::wrap(handler);
     canvas.add_event_listener_with_callback("mousemove", handler.as_ref().unchecked_ref())?;
-    handler.forget(); 
+    handler.forget();
 
     Ok(())
 }
@@ -103,4 +103,4 @@ pub fn attach_mouse_handlers(canvas: &web_sys::HtmlCanvasElement, gui: Rc<RefCel
     attach_mouse_up_handler(&canvas, Rc::clone(&gui))?;
 
     Ok(())
-} 
+}

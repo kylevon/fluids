@@ -1,5 +1,5 @@
-uniform mat4 model_view_mat; 
-uniform mat4 projection_mat; 
+uniform mat4 model_view_mat;
+uniform mat4 projection_mat;
 
 attribute vec4 vertex_position;
 void main() {
