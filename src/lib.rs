@@ -11,6 +11,7 @@ use wasm_bindgen::JsCast;
 use web_sys::WebGlRenderingContext as GL;
 
 use nalgebra::Vector3;
+use nalgebra::Vector2;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -96,6 +97,7 @@ pub fn start() -> Result<(), JsValue> {
     let press_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::PRESS_FRAGMENT_SHADER)?;
     let colorize_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::COLORIZE_FRAGMENT_SHADER)?;
     let obstacle_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::OBSTACLE_FRAGMENT_SHADER)?;
+    let source_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::SOURCE_FRAGMENT_SHADER)?;
     let force_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::FORCE_FRAGMENT_SHADER)?;
     let color_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::COLOR_FRAGMENT_SHADER)?;
     let vorticity_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::VORT_FRAGMENT_SHADER)?;
@@ -151,6 +153,12 @@ pub fn start() -> Result<(), JsValue> {
     let obstacle_pass = render::RenderPass::new(&gl,
         [&standard_vert_shader, &obstacle_frag_shader],
         vec!["obstacle_field","background_image"], "vertex_position",
+        &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
+    )?;
+
+    let source_pass = render::RenderPass::new(&gl,
+        [&standard_vert_shader, &source_frag_shader],
+        vec!["pixel_size", "incoming_flow", "velocity_field"], "vertex_position",
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
     )?;
 
@@ -226,6 +234,20 @@ pub fn start() -> Result<(), JsValue> {
             src_pressure_grad_field = Rc::new(texture::Framebuffer::new(&gl, width, height).unwrap());
 
             cur_reset_flag = reset_flag_value;
+        }
+
+        {
+            // set velocity of incoming flow
+            let incoming = Vector2::new(1.0, 0.0);
+
+            let result = render_fluid::source(&gl, &source_pass,
+                delta_x,
+                &incoming,
+                Rc::clone(&src_velocity_field),
+                Rc::clone(&dst_velocity_field));
+
+            src_velocity_field = result.0;
+            dst_velocity_field = result.1;
         }
 
         {

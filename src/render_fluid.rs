@@ -288,6 +288,37 @@ pub fn pressure(gl: &GL,
     (dst, pressure_field)
 }
 
+pub fn source(gl:   &GL,
+    source_pass:    &render::RenderPass,
+    pixel_size:     f32,
+    incoming_flow:  &Vector2<f32>,
+    velocity_field: Rc<texture::Framebuffer>,
+    dst:            Rc<texture::Framebuffer>,
+) -> (Rc<texture::Framebuffer>, Rc<texture::Framebuffer>) {
+    dst.bind(&gl);
+    source_pass.use_program(&gl);
+
+    gl.uniform1f(source_pass.uniforms["pixel_size"].as_ref(), pixel_size);
+    gl.uniform2f(source_pass.uniforms["incoming_flow"].as_ref(), incoming_flow.x, incoming_flow.y);
+
+    gl.uniform1i(source_pass.uniforms["velocity_field"].as_ref(), 0);
+
+    gl.active_texture(GL::TEXTURE0);
+    gl.bind_texture(GL::TEXTURE_2D, Some(velocity_field.get_texture()));
+
+
+    gl.bind_buffer(GL::ARRAY_BUFFER, Some(&source_pass.vertex_buffer));
+    gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);
+    gl.enable_vertex_attrib_array(0);
+
+    gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&source_pass.index_buffer));
+
+    gl.draw_elements_with_i32(GL::TRIANGLES, 6, GL::UNSIGNED_SHORT, 0);
+    dst.unbind(&gl);
+
+    (dst, velocity_field)
+}
+
 pub fn force(gl: &GL,
     force_pass:  &render::RenderPass,
     delta_t:        f32,
