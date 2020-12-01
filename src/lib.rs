@@ -37,9 +37,9 @@ fn document() -> web_sys::Document {
         .expect("should have a document on the window")
 }
 
-fn body() -> web_sys::HtmlElement {
-    document().body().expect("document should have a body")
-}
+// fn body() -> web_sys::HtmlElement {
+//     document().body().expect("document should have a body")
+// }
 
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
@@ -162,12 +162,11 @@ pub fn start() -> Result<(), JsValue> {
     let obstacle_field_data = texture::make_tube_obstacles(width as f32, height as f32);
     
 
-    let mut cur_vector = 0;
     let mut cur_reset_flag = 0;
 
     let mut src_velocity_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, vf_data.clone())?);
     let mut dst_velocity_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
-    let mut obstacle_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, obstacle_field_data.clone())?);
+    let obstacle_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, obstacle_field_data.clone())?);
 
     let mut src_pressure_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
     let mut dst_pressure_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
