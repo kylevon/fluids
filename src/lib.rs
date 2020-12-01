@@ -236,50 +236,12 @@ pub fn start() -> Result<(), JsValue> {
             cur_reset_flag = reset_flag_value;
         }
 
-        {
-            // set velocity of incoming flow
-            let incoming = Vector2::new(1.0, 0.0);
 
-            let result = render_fluid::source(&gl, &source_pass,
-                delta_x,
-                &incoming,
-                Rc::clone(&src_velocity_field),
-                Rc::clone(&dst_velocity_field));
-
-            src_velocity_field = result.0;
-            dst_velocity_field = result.1;
-        }
-
-        {
-            // advect vector field
-            let result = render_fluid::advection(&gl, &advect_pass,
-                delta_x, delta_t,
-                Rc::clone(&src_velocity_field), &src_velocity_field, Rc::clone(&dst_velocity_field));
-
-            src_velocity_field = result.0;
-            dst_velocity_field = result.1; // rust does not have destructuring assignment yet https://github.com/rust-lang/rfcs/issues/372
-        }
-
-        {
-            // viscuous diffusion
-            let viscocity = (10.0_f32).powf(viscocity_slider.value_as_number() as f32);
-            let alpha   = delta_x.powf(2.0) / (viscocity * delta_t);
-            let r_beta  = 1.0/(4.0 + alpha);
-
-            let bufs = [&src_velocity_field, &dst_velocity_field];
-            for k in 0..iter {
-                let j_source = bufs[k % 2];
-                let j_dst = bufs[(k + 1) % 2];
-
-                j_dst.bind(&gl);
-                render_fluid::jacobi_iteration(&gl, &jacobi_pass, delta_x, alpha, r_beta, &j_source, &j_source);
-                j_dst.unbind(&gl);
-            }
-        }
 
         {
             if gui.mouse_pressed {
                 // add forces
+                // ADD FORCE
                 let rho = 1e-3;
                 let speed = speed_slider.value_as_number() as f32;
                 let force = speed * gui.mouse_vec;
@@ -319,6 +281,35 @@ pub fn start() -> Result<(), JsValue> {
         }
 
         {
+            // advect vector field
+            // ADVECT
+            let result = render_fluid::advection(&gl, &advect_pass,
+                delta_x, delta_t,
+                Rc::clone(&src_velocity_field), &src_velocity_field, Rc::clone(&dst_velocity_field));
+
+            src_velocity_field = result.0;
+            dst_velocity_field = result.1; // rust does not have destructuring assignment yet https://github.com/rust-lang/rfcs/issues/372
+        }
+
+        {
+            // viscuous diffusion
+            // // DIFFUSE
+            let viscocity = (10.0_f32).powf(viscocity_slider.value_as_number() as f32);
+            let alpha   = delta_x.powf(2.0) / (viscocity * delta_t);
+            let r_beta  = 1.0/(4.0 + alpha);
+
+            let bufs = [&src_velocity_field, &dst_velocity_field];
+            for k in 0..iter {
+                let j_source = bufs[k % 2];
+                let j_dst = bufs[(k + 1) % 2];
+
+                j_dst.bind(&gl);
+                render_fluid::jacobi_iteration(&gl, &jacobi_pass, delta_x, alpha, r_beta, &j_source, &j_source);
+                j_dst.unbind(&gl);
+            }
+        }
+
+        {
             // compute pressure gradient
             divergence_fb = render_fluid::divergence(&gl, &divergence_pass,
                 delta_x, &src_velocity_field, Rc::clone(&divergence_fb));
@@ -352,10 +343,10 @@ pub fn start() -> Result<(), JsValue> {
             src_velocity_field = v_result.0;
             dst_velocity_field = v_result.1;
 
-            let p_result = render_fluid::boundary(&gl, &boundary_pass,
-                delta_x, false, Rc::clone(&src_pressure_grad_field), Rc::clone(&obstacle_field), Rc::clone(&dst_pressure_grad_field));
-                src_pressure_grad_field = p_result.0;
-                dst_pressure_grad_field = p_result.1;
+            // let p_result = render_fluid::boundary(&gl, &boundary_pass,
+            //     delta_x, false, Rc::clone(&src_pressure_grad_field), Rc::clone(&obstacle_field), Rc::clone(&dst_pressure_grad_field));
+            //     src_pressure_grad_field = p_result.0;
+            //     dst_pressure_grad_field = p_result.1;
         }
 
         {
@@ -367,6 +358,20 @@ pub fn start() -> Result<(), JsValue> {
             src_velocity_field = result.0;
             dst_velocity_field = result.1;
 
+        }
+
+        {
+            // set velocity of incoming flow
+            let incoming = Vector2::new(1.0, 0.0);
+
+            let result = render_fluid::source(&gl, &source_pass,
+                delta_x,
+                &incoming,
+                Rc::clone(&src_velocity_field),
+                Rc::clone(&dst_velocity_field));
+
+            src_velocity_field = result.0;
+            dst_velocity_field = result.1;
         }
 
         {
@@ -408,7 +413,7 @@ pub fn start() -> Result<(), JsValue> {
 
             // add the obstacles
             display_buffer = render_fluid::obstacle(&gl, &obstacle_pass,
-                Rc::clone(&pressure_color_fb),
+                Rc::clone(&src_color_field),
                 Rc::clone(&obstacle_field),
                 Rc::clone(&display_buffer));
         }

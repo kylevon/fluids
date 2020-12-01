@@ -179,7 +179,7 @@ pub fn make_constant_vector_field(width: f32, height: f32) -> Vec<f32> {
 
     for _ in 0..(height as i32){
         for _ in 0..(width as i32) {
-            let v = Vector3::new(1.0, 0.0, 0.0);
+            let v = Vector3::new(0.0, 0.0, 0.0);
 
             data.push(v.x);
             data.push(v.y);
@@ -207,6 +207,12 @@ pub fn make_tube_obstacles(width: f32, height: f32) -> Vec<f32> {
                 data.push(0.0);
                 data.push(1.0);
             }
+            // else if _c == (width as i32) - 1 {
+            //     data.push(-1.0);
+            //     data.push(0.0);
+            //     data.push(0.0);
+            //     data.push(1.0);
+            // }
             else if _c == 192
             {
                 if r >= 192 && r <= 320
