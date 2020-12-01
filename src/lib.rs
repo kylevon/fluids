@@ -94,6 +94,8 @@ pub fn start() -> Result<(), JsValue> {
     let subtract_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::SUB_FRAGMENT_SHADER)?;
     let bound_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::BOUND_FRAGMENT_SHADER)?;
     let press_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::PRESS_FRAGMENT_SHADER)?;
+    let colorize_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::COLORIZE_FRAGMENT_SHADER)?;
+    let obstacle_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::OBSTACLE_FRAGMENT_SHADER)?;
     let force_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::FORCE_FRAGMENT_SHADER)?;
     let color_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::COLOR_FRAGMENT_SHADER)?;
     let vorticity_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::VORT_FRAGMENT_SHADER)?;
@@ -137,6 +139,18 @@ pub fn start() -> Result<(), JsValue> {
     let pressure_pass = render::RenderPass::new(&gl,
         [&standard_vert_shader, &press_frag_shader],
         vec!["velocity_field", "pressure_gradient", "pressure_field"], "vertex_position",
+        &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
+    )?;
+
+    let colorize_pass = render::RenderPass::new(&gl,
+        [&standard_vert_shader, &colorize_frag_shader],
+        vec!["pressure_field"], "vertex_position",
+        &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
+    )?;
+
+    let obstacle_pass = render::RenderPass::new(&gl,
+        [&standard_vert_shader, &obstacle_frag_shader],
+        vec!["obstacle_field","background_image"], "vertex_position",
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
     )?;
 
@@ -184,8 +198,12 @@ pub fn start() -> Result<(), JsValue> {
 
     let mut divergence_fb = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
 
+    let mut pressure_color_fb = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
+
     let mut src_color_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, cb_data.clone())?);
     let mut dst_color_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
+
+    let mut display_buffer = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
 
     let rainbow_colors = texture::get_rainbow_array();
 
@@ -349,6 +367,28 @@ pub fn start() -> Result<(), JsValue> {
 
             src_pressure_field = result.0;
             dst_pressure_field = result.1;
+
+            // compute its color
+            pressure_color_fb = render_fluid::colorize(&gl, &colorize_pass,
+                Rc::clone(&src_pressure_field),
+                Rc::clone(&pressure_color_fb));
+
+
+        }
+
+        {
+            // TODO: mix pressure and ink according to slider?
+
+            // [MIX]
+
+
+
+
+            // add the obstacles
+            display_buffer = render_fluid::obstacle(&gl, &obstacle_pass,
+                Rc::clone(&pressure_color_fb),
+                Rc::clone(&obstacle_field),
+                Rc::clone(&display_buffer));
         }
 
         {
@@ -359,7 +399,7 @@ pub fn start() -> Result<(), JsValue> {
             gl.uniform1i(quad_pass.uniforms["qtexture"].as_ref(), 0);
 
             gl.active_texture(GL::TEXTURE0);
-            gl.bind_texture(GL::TEXTURE_2D, Some(src_color_field.get_texture()));
+            gl.bind_texture(GL::TEXTURE_2D, Some(display_buffer.get_texture()));
 
             gl.bind_buffer(GL::ARRAY_BUFFER, Some(&quad_pass.vertex_buffer));
             gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);

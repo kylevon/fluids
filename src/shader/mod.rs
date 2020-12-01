@@ -13,6 +13,8 @@ pub static FORCE_FRAGMENT_SHADER:  &'static str = include_str!("./force.frag");
 pub static COLOR_FRAGMENT_SHADER:  &'static str = include_str!("./dye.frag");
 pub static SUB_FRAGMENT_SHADER:    &'static str = include_str!("./subtract.frag");
 pub static BOUND_FRAGMENT_SHADER:  &'static str = include_str!("./boundary.frag");
+pub static COLORIZE_FRAGMENT_SHADER:  &'static str = include_str!("./colorize.frag");
+pub static OBSTACLE_FRAGMENT_SHADER:  &'static str = include_str!("./obstacle.frag");
 pub static PRESS_FRAGMENT_SHADER:  &'static str = include_str!("./pressure.frag");
 pub static VORT_FRAGMENT_SHADER: &'static str = include_str!("./vorticity.frag");
 

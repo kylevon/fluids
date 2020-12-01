@@ -178,18 +178,11 @@ pub fn make_constant_vector_field(width: f32, height: f32) -> Vec<f32> {
     let mut data = Vec::with_capacity((width * height * 4.0) as usize);
 
     for _ in 0..(height as i32){
-        for c in 0..(width as i32) {
+        for _ in 0..(width as i32) {
             let v = Vector3::new(1.0, 0.0, 0.0);
-            if c == 0
-            {
-                data.push(v.x);
-                data.push(v.y);
-            }
-            else
-            {
-                data.push(0.0);
-                data.push(0.0);
-            }
+
+            data.push(v.x);
+            data.push(v.y);
             data.push(0.0);
             data.push(1.0);
         }
@@ -205,17 +198,98 @@ pub fn make_tube_obstacles(width: f32, height: f32) -> Vec<f32> {
             if r == 0 {
                 data.push(0.0);
                 data.push(1.0);
+                data.push(0.0);
+                data.push(1.0);
             }
             else if r == (height as i32) - 1 {
                 data.push(0.0);
                 data.push(-1.0);
+                data.push(0.0);
+                data.push(1.0);
+            }
+            else if _c == 192
+            {
+                if r >= 192 && r <= 320
+                {
+                    data.push(-1.0);
+                    data.push(0.0);
+                    data.push(0.0);
+                    data.push(1.0);
+                }
+                else
+                {
+                    data.push(0.0);
+                    data.push(0.0);
+                    data.push(0.0);
+                    data.push(0.0);
+                }
+            }
+            else if _c == 320
+            {
+                if r >= 192 && r <= 320
+                {
+                    data.push(1.0);
+                    data.push(0.0);
+                    data.push(0.0);
+                    data.push(1.0);
+                }
+                else
+                {
+                    data.push(0.0);
+                    data.push(0.0);
+                    data.push(0.0);
+                    data.push(0.0);
+                }
+            }
+            else if r == 192
+            {
+                if _c >= 192 && _c <= 320
+                {
+                    data.push(0.0);
+                    data.push(-1.0);
+                    data.push(0.0);
+                    data.push(1.0);
+                }
+                else
+                {
+                    data.push(0.0);
+                    data.push(0.0);
+                    data.push(0.0);
+                    data.push(0.0);
+                }
+            }
+            else if r == 320
+            {
+                if _c >= 192 && _c <= 320
+                {
+                    data.push(0.0);
+                    data.push(1.0);
+                    data.push(0.0);
+                    data.push(1.0);
+                }
+                else
+                {
+                    data.push(0.0);
+                    data.push(0.0);
+                    data.push(0.0);
+                    data.push(0.0);
+                }
+            }
+            else if r > 192 && r < 320 && _c > 192 && _c < 320
+            {
+                // Interior del cubo
+                data.push(0.0);
+                data.push(0.0);
+                data.push(0.0);
+                data.push(1.0);
             }
             else {
                 data.push(0.0);
                 data.push(0.0);
+                data.push(0.0);
+                data.push(0.0);
             }
-            data.push(0.0);
-            data.push(1.0);
+
         }
     }
 
