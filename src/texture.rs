@@ -160,7 +160,7 @@ pub fn make_checkerboard_array(width: i32, height: i32) -> Vec<f32> {
 
             let mut val = 0.0;
             if (x_step + y_step) % 2 == 0 {
-                val = 0.0;
+                val = 1.0;
             }
 
             data.push(1.0-val);
