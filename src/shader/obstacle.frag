@@ -8,8 +8,8 @@ varying vec2 UV;
 void main()
 {
     // Que tan obstaculo es esta celda. 0 = no es obstaculo, 1 = 100% obstaculo
-    // float obstacle_percentage = texture2D(obstacle_field, UV).w;
-    float obstacle_percentage = 0.0;
+    float obstacle_percentage = length(texture2D(obstacle_field, UV)) > 0.0 ? 1.0 : 0.0;
+    // float obstacle_percentage = 0.0;
 
     vec3 obstacle_color = vec3(0.0, 0.0, 0.0);
 

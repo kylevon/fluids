@@ -104,7 +104,7 @@ pub fn start() -> Result<(), JsValue> {
 
     let advect_pass = render::RenderPass::new(&gl,
         [&standard_vert_shader, &advect_frag_shader],
-        vec!["delta_x", "vec_field_texture",  "color_field_texture", "delta_t"], "vertex_position",
+        vec!["delta_x", "vec_field_texture",  "color_field_texture", "delta_t", "obstacle_field"], "vertex_position",
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
     )?;
 
@@ -116,19 +116,19 @@ pub fn start() -> Result<(), JsValue> {
 
     let jacobi_pass = render::RenderPass::new(&gl,
         [&standard_vert_shader, &jacobi_frag_shader],
-        vec!["delta_x", "alpha", "r_beta", "x", "b"], "vertex_position",
+        vec!["delta_x", "alpha", "r_beta", "x", "b", "obstacle_field"], "vertex_position",
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
     )?;
 
     let divergence_pass = render::RenderPass::new(&gl,
         [&standard_vert_shader, &divergence_frag_shader],
-        vec!["delta_x", "w"], "vertex_position",
+        vec!["delta_x", "w", "obstacle_field"], "vertex_position",
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
     )?;
 
     let subtract_pass = render::RenderPass::new(&gl,
         [&standard_vert_shader, &subtract_frag_shader],
-        vec!["delta_x", "p", "w"], "vertex_position",
+        vec!["delta_x", "p", "w", "obstacle_field"], "vertex_position",
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
     )?;
 
@@ -184,7 +184,7 @@ pub fn start() -> Result<(), JsValue> {
     let f = Rc::new(RefCell::new(None));
     let g = f.clone();
 
-    let delta_x = 1.0/width as f32;
+    let delta_x = 1.0/height as f32;
 
     let vf_data = texture::make_constant_vector_field(width as f32, height as f32);
     let cb_data = texture::make_checkerboard_array(width, height);
@@ -285,7 +285,10 @@ pub fn start() -> Result<(), JsValue> {
             // ADVECT
             let result = render_fluid::advection(&gl, &advect_pass,
                 delta_x, delta_t,
-                Rc::clone(&src_velocity_field), &src_velocity_field, Rc::clone(&dst_velocity_field));
+                Rc::clone(&src_velocity_field),
+                &src_velocity_field,
+                Rc::clone(&obstacle_field),
+                Rc::clone(&dst_velocity_field));
 
             src_velocity_field = result.0;
             dst_velocity_field = result.1; // rust does not have destructuring assignment yet https://github.com/rust-lang/rfcs/issues/372
@@ -304,33 +307,39 @@ pub fn start() -> Result<(), JsValue> {
                 let j_dst = bufs[(k + 1) % 2];
 
                 j_dst.bind(&gl);
-                render_fluid::jacobi_iteration(&gl, &jacobi_pass, delta_x, alpha, r_beta, &j_source, &j_source);
+                render_fluid::jacobi_iteration(&gl, &jacobi_pass, delta_x, alpha, r_beta, &j_source, &j_source, Rc::clone(&obstacle_field));
                 j_dst.unbind(&gl);
             }
         }
 
         {
+            // PROJECT
+
             // compute pressure gradient
             divergence_fb = render_fluid::divergence(&gl, &divergence_pass,
-                delta_x, &src_velocity_field, Rc::clone(&divergence_fb));
+                delta_x, &src_velocity_field,
+                Rc::clone(&obstacle_field),
+                Rc::clone(&divergence_fb));
 
             let alpha   = -(delta_x.powf(2.0));
             let r_beta  = 0.25;
 
             let result = render_fluid::jacobi_method(&gl, &jacobi_pass, iter,
                 delta_x, alpha, r_beta,
-                Rc::clone(&src_pressure_grad_field), &divergence_fb, Rc::clone(&dst_pressure_grad_field));
+                Rc::clone(&src_pressure_grad_field),
+                &divergence_fb,
+                Rc::clone(&obstacle_field),
+                Rc::clone(&dst_pressure_grad_field));
 
             src_pressure_grad_field = result.0;
             dst_pressure_grad_field = result.1;
 
-        }
-
-        {
             // gradient subtraction
             let result = render_fluid::subtract(&gl, &subtract_pass,
                 delta_x, &src_pressure_grad_field,
-                Rc::clone(&src_velocity_field), Rc::clone(&dst_velocity_field));
+                Rc::clone(&src_velocity_field),
+                Rc::clone(&obstacle_field),
+                Rc::clone(&dst_velocity_field));
 
             src_velocity_field = result.0;
             dst_velocity_field = result.1;
@@ -343,10 +352,10 @@ pub fn start() -> Result<(), JsValue> {
             src_velocity_field = v_result.0;
             dst_velocity_field = v_result.1;
 
-            // let p_result = render_fluid::boundary(&gl, &boundary_pass,
-            //     delta_x, false, Rc::clone(&src_pressure_grad_field), Rc::clone(&obstacle_field), Rc::clone(&dst_pressure_grad_field));
-            //     src_pressure_grad_field = p_result.0;
-            //     dst_pressure_grad_field = p_result.1;
+            let p_result = render_fluid::boundary(&gl, &boundary_pass,
+                delta_x, false, Rc::clone(&src_pressure_grad_field), Rc::clone(&obstacle_field), Rc::clone(&dst_pressure_grad_field));
+                src_pressure_grad_field = p_result.0;
+                dst_pressure_grad_field = p_result.1;
         }
 
         {
@@ -378,7 +387,10 @@ pub fn start() -> Result<(), JsValue> {
             // advect color field
             let result = render_fluid::advection(&gl, &advect_pass,
                  delta_x, delta_t,
-                 Rc::clone(&src_color_field), &src_velocity_field, Rc::clone(&dst_color_field));
+                 Rc::clone(&src_color_field),
+                 &src_velocity_field,
+                 Rc::clone(&obstacle_field),
+                 Rc::clone(&dst_color_field));
 
             src_color_field = result.0;
             dst_color_field = result.1;

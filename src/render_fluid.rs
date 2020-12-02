@@ -12,6 +12,7 @@ pub fn advection(gl: &GL,
     delta_t:            f32,
     src_color_field:    Rc<texture::Framebuffer>,
     vector_field:       &texture::Framebuffer,
+    obstacle_field:     Rc<texture::Framebuffer>,
     dst_color_field:    Rc<texture::Framebuffer>,
 ) ->  (Rc<texture::Framebuffer>, Rc<texture::Framebuffer>) {
     dst_color_field.bind(&gl);
@@ -23,12 +24,16 @@ pub fn advection(gl: &GL,
     gl.uniform1f(advect_pass.uniforms["delta_t"].as_ref(), delta_t);
     gl.uniform1i(advect_pass.uniforms["color_field_texture"].as_ref(), 0);
     gl.uniform1i(advect_pass.uniforms["vec_field_texture"].as_ref(), 1);
+    gl.uniform1i(advect_pass.uniforms["obstacle_field"].as_ref(), 2);
 
     gl.active_texture(GL::TEXTURE0);
     gl.bind_texture(GL::TEXTURE_2D, Some(src_color_field.get_texture()));
 
     gl.active_texture(GL::TEXTURE1);
     gl.bind_texture(GL::TEXTURE_2D, Some(vector_field.get_texture()));
+
+    gl.active_texture(GL::TEXTURE2);
+    gl.bind_texture(GL::TEXTURE_2D, Some(obstacle_field.get_texture()));
 
     gl.bind_buffer(GL::ARRAY_BUFFER, Some(&advect_pass.vertex_buffer));
     gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);
@@ -50,6 +55,7 @@ pub fn jacobi_method(gl: &GL,
     r_beta:         f32,
     x:              Rc<texture::Framebuffer>,
     b:              &texture::Framebuffer,
+    obstacle_field: Rc<texture::Framebuffer>,
     dst:            Rc<texture::Framebuffer>,
 ) -> (Rc<texture::Framebuffer>, Rc<texture::Framebuffer>)
 {
@@ -59,7 +65,7 @@ pub fn jacobi_method(gl: &GL,
         let j_dst = bufs[(k + 1) % 2];
 
         j_dst.bind(&gl);
-        jacobi_iteration(&gl, &jacobi_pass, delta_x, alpha, r_beta, &j_source, &b);
+        jacobi_iteration(&gl, &jacobi_pass, delta_x, alpha, r_beta, &j_source, &b, Rc::clone(&obstacle_field));
         j_dst.unbind(&gl);
     }
 
@@ -74,6 +80,7 @@ pub fn jacobi_iteration(gl: &GL,
     r_beta:         f32,
     x:              &texture::Framebuffer,
     b:              &texture::Framebuffer,
+    obstacle_field: Rc<texture::Framebuffer>
 )
 {
     render::clear_framebuffer(&gl);
@@ -85,12 +92,16 @@ pub fn jacobi_iteration(gl: &GL,
 
     gl.uniform1i(jacobi_pass.uniforms["x"].as_ref(), 0);
     gl.uniform1i(jacobi_pass.uniforms["b"].as_ref(), 1);
+    gl.uniform1i(jacobi_pass.uniforms["obstacle_field"].as_ref(), 2);
 
     gl.active_texture(GL::TEXTURE0);
     gl.bind_texture(GL::TEXTURE_2D, Some(x.get_texture()));
 
     gl.active_texture(GL::TEXTURE1);
     gl.bind_texture(GL::TEXTURE_2D, Some(b.get_texture()));
+
+    gl.active_texture(GL::TEXTURE2);
+    gl.bind_texture(GL::TEXTURE_2D, Some(obstacle_field.get_texture()));
 
     gl.bind_buffer(GL::ARRAY_BUFFER, Some(&jacobi_pass.vertex_buffer));
     gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);
@@ -106,6 +117,7 @@ pub fn divergence(gl: &GL,
     divergence_pass:    &render::RenderPass,
     delta_x:            f32,
     w:                  &texture::Framebuffer,
+    obstacle_field:     Rc<texture::Framebuffer>,
     dst:                Rc<texture::Framebuffer>,
 ) -> Rc<texture::Framebuffer> {
     dst.bind(&gl);
@@ -115,9 +127,13 @@ pub fn divergence(gl: &GL,
     gl.uniform1f(divergence_pass.uniforms["delta_x"].as_ref(), delta_x);
 
     gl.uniform1i(divergence_pass.uniforms["w"].as_ref(), 0);
+    gl.uniform1i(divergence_pass.uniforms["obstacle_field"].as_ref(), 1);
 
     gl.active_texture(GL::TEXTURE0);
     gl.bind_texture(GL::TEXTURE_2D, Some(w.get_texture()));
+
+    gl.active_texture(GL::TEXTURE1);
+    gl.bind_texture(GL::TEXTURE_2D, Some(obstacle_field.get_texture()));
 
     gl.bind_buffer(GL::ARRAY_BUFFER, Some(&divergence_pass.vertex_buffer));
     gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);
@@ -136,6 +152,7 @@ pub fn subtract(gl: &GL,
     delta_x:        f32,
     p:              &texture::Framebuffer,
     w:              Rc<texture::Framebuffer>,
+    obstacle_field: Rc<texture::Framebuffer>,
     dst:            Rc<texture::Framebuffer>,
 ) -> (Rc<texture::Framebuffer>, Rc<texture::Framebuffer>) {
     dst.bind(&gl);
@@ -146,11 +163,14 @@ pub fn subtract(gl: &GL,
 
     gl.uniform1i(subtract_pass.uniforms["p"].as_ref(), 0);
     gl.uniform1i(subtract_pass.uniforms["w"].as_ref(), 1);
+    gl.uniform1i(subtract_pass.uniforms["obstacle_field"].as_ref(), 2);
 
     gl.active_texture(GL::TEXTURE0);
     gl.bind_texture(GL::TEXTURE_2D, Some(p.get_texture()));
     gl.active_texture(GL::TEXTURE1);
     gl.bind_texture(GL::TEXTURE_2D, Some(w.get_texture()));
+    gl.active_texture(GL::TEXTURE2);
+    gl.bind_texture(GL::TEXTURE_2D, Some(obstacle_field.get_texture()));
 
     gl.bind_buffer(GL::ARRAY_BUFFER, Some(&subtract_pass.vertex_buffer));
     gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);
