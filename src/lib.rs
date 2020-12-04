@@ -50,6 +50,9 @@ pub fn start() -> Result<(), JsValue> {
     let canvas = document().get_element_by_id("canvas").unwrap();
     let canvas: web_sys::HtmlCanvasElement = canvas.dyn_into::<web_sys::HtmlCanvasElement>()?;
 
+    let vel_mag_slider = document().get_element_by_id("magnitude_slider").unwrap();
+    let vel_mag_slider: web_sys::HtmlInputElement = vel_mag_slider.dyn_into::<web_sys::HtmlInputElement>()?;
+
     let jacobi_slider = document().get_element_by_id("jacobi_slider").unwrap();
     let jacobi_slider: web_sys::HtmlInputElement = jacobi_slider.dyn_into::<web_sys::HtmlInputElement>()?;
 
@@ -146,7 +149,7 @@ pub fn start() -> Result<(), JsValue> {
 
     let colorize_velocity_pass = render::RenderPass::new(&gl,
         [&standard_vert_shader, &colorize_velocity_frag_shader],
-        vec!["velocity_field"], "vertex_position",
+        vec!["velocity_field", "magnitude_scale"], "vertex_position",
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
     )?;
 
@@ -213,6 +216,7 @@ pub fn start() -> Result<(), JsValue> {
         let gui = gui.borrow();
 
         let iter = jacobi_slider.value_as_number() as usize;
+        let magnitude_scale = (vel_mag_slider.value_as_number() as f32) / 10.0;
         let delta_t = 1.0/60.0;
 
         let reset_flag_value = reset_flag_element.selected_index();
@@ -401,11 +405,14 @@ pub fn start() -> Result<(), JsValue> {
             }
             else if visualization_mode == 1
             {
-                display_buffer = render_fluid::colorize_velocity(&gl, &colorize_velocity_pass,
+                display_buffer = render_fluid::colorize_velocity(&gl,
+                    &colorize_velocity_pass,
+                    magnitude_scale,
                     Rc::clone(&src_velocity_field),
                     Rc::clone(&display_buffer));
 
-                display_buffer = render_fluid::obstacle(&gl, &obstacle_pass,
+                display_buffer = render_fluid::obstacle(&gl,
+                    &obstacle_pass,
                     Rc::clone(&display_buffer),
                     Rc::clone(&obstacle_field),
                     Rc::clone(&display_buffer));

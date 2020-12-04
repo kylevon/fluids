@@ -69,7 +69,11 @@
                 <button type='button' id="reset_button">
                   Reset
                 </button>
-
+                <h6>Velocity Magnitude</h6>
+                <div class = "range-slider">
+                  <input id="magnitude_slider" type="range" min="10" max="100" value="60"/>
+                  <span id="magnitude_value" class="range-slider_value">6</span>
+                </div>
                 <h6>Jacobi Iterations</h6>
                 <div class = "range-slider">
                   <input id="jacobi_slider" type="range" min="10" max="50" value="20"/>
@@ -103,6 +107,7 @@
         slider.each(function() {
           range.on('input', function() {
             if ($(this).attr('id') == "viscocity_slider") $(this).next(value).html("1e" + this.value);
+            else if ($(this).attr('id') == "magnitude_slider") $(this).next(value).html(this.value / 10);
             else $(this).next(value).html(this.value);
           });
         });

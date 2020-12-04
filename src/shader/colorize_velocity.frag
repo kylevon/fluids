@@ -1,6 +1,7 @@
 precision mediump float;
 
 uniform sampler2D velocity_field;
+uniform float magnitude_scale;
 
 varying vec2 UV;
 
@@ -26,7 +27,7 @@ void main()
     // Magnitud del vector velocidad
     float m = length(v);
     // magnificada para que sea mas visible
-    m *= 10.0;
+    m *= magnitude_scale;
     // normalizada de 0 a pi/2 (ya que m > 0)
     m = atan(m);
     // de 0 a 0.5

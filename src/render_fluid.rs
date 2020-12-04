@@ -245,11 +245,14 @@ pub fn colorize_pressure(gl: &GL,
 
 pub fn colorize_velocity(gl: &GL,
     colorize_velocity_pass:  &render::RenderPass,
+    magnitude_scale:         f32,
     velocity_field: Rc<texture::Framebuffer>,
     dst:            Rc<texture::Framebuffer>,
 ) -> Rc<texture::Framebuffer> {
     dst.bind(&gl);
     colorize_velocity_pass.use_program(&gl);
+
+    gl.uniform1f(colorize_velocity_pass.uniforms["magnitude_scale"].as_ref(), magnitude_scale);
 
     gl.uniform1i(colorize_velocity_pass.uniforms["velocity_field"].as_ref(), 0);
 
