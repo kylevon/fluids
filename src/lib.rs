@@ -89,7 +89,8 @@ pub fn start() -> Result<(), JsValue> {
     let subtract_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::SUB_FRAGMENT_SHADER)?;
     let bound_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::BOUND_FRAGMENT_SHADER)?;
     let press_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::PRESS_FRAGMENT_SHADER)?;
-    let colorize_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::COLORIZE_PRESSURE_FRAGMENT_SHADER)?;
+    let colorize_pressure_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::COLORIZE_PRESSURE_FRAGMENT_SHADER)?;
+    let colorize_velocity_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::COLORIZE_VELOCITY_FRAGMENT_SHADER)?;
     let obstacle_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::OBSTACLE_FRAGMENT_SHADER)?;
     let source_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::SOURCE_FRAGMENT_SHADER)?;
     let color_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::COLOR_FRAGMENT_SHADER)?;
@@ -138,8 +139,14 @@ pub fn start() -> Result<(), JsValue> {
     )?;
 
     let colorize_pressure_pass = render::RenderPass::new(&gl,
-        [&standard_vert_shader, &colorize_frag_shader],
+        [&standard_vert_shader, &colorize_pressure_frag_shader],
         vec!["pressure_field"], "vertex_position",
+        &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
+    )?;
+
+    let colorize_velocity_pass = render::RenderPass::new(&gl,
+        [&standard_vert_shader, &colorize_velocity_frag_shader],
+        vec!["velocity_field"], "vertex_position",
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
     )?;
 
@@ -394,7 +401,14 @@ pub fn start() -> Result<(), JsValue> {
             }
             else if visualization_mode == 1
             {
+                display_buffer = render_fluid::colorize_velocity(&gl, &colorize_velocity_pass,
+                    Rc::clone(&src_velocity_field),
+                    Rc::clone(&display_buffer));
 
+                display_buffer = render_fluid::obstacle(&gl, &obstacle_pass,
+                    Rc::clone(&display_buffer),
+                    Rc::clone(&obstacle_field),
+                    Rc::clone(&display_buffer));
             }
             else if visualization_mode == 2
             {

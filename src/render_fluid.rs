@@ -243,6 +243,31 @@ pub fn colorize_pressure(gl: &GL,
     dst
 }
 
+pub fn colorize_velocity(gl: &GL,
+    colorize_velocity_pass:  &render::RenderPass,
+    velocity_field: Rc<texture::Framebuffer>,
+    dst:            Rc<texture::Framebuffer>,
+) -> Rc<texture::Framebuffer> {
+    dst.bind(&gl);
+    colorize_velocity_pass.use_program(&gl);
+
+    gl.uniform1i(colorize_velocity_pass.uniforms["velocity_field"].as_ref(), 0);
+
+    gl.active_texture(GL::TEXTURE0);
+    gl.bind_texture(GL::TEXTURE_2D, Some(velocity_field.get_texture()));
+
+    gl.bind_buffer(GL::ARRAY_BUFFER, Some(&colorize_velocity_pass.vertex_buffer));
+    gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);
+    gl.enable_vertex_attrib_array(0);
+
+    gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&colorize_velocity_pass.index_buffer));
+
+    gl.draw_elements_with_i32(GL::TRIANGLES, 6, GL::UNSIGNED_SHORT, 0);
+    dst.unbind(&gl);
+
+    dst
+}
+
 pub fn obstacle(gl: &GL,
     obstacle_pass:  &render::RenderPass,
     background: Rc<texture::Framebuffer>,
