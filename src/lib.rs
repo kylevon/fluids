@@ -56,15 +56,6 @@ pub fn start() -> Result<(), JsValue> {
     let viscocity_slider = document().get_element_by_id("viscocity_slider").unwrap();
     let viscocity_slider: web_sys::HtmlInputElement = viscocity_slider.dyn_into::<web_sys::HtmlInputElement>()?;
 
-    let random_color = document().get_element_by_id("random_color").unwrap();
-    let random_color: web_sys::HtmlInputElement = random_color.dyn_into::<web_sys::HtmlInputElement>()?;
-
-    let splat_color = document().get_element_by_id("splat_color").unwrap();
-    let splat_color: web_sys::HtmlInputElement = splat_color.dyn_into::<web_sys::HtmlInputElement>()?;
-
-    let speed_slider = document().get_element_by_id("speed_slider").unwrap();
-    let speed_slider: web_sys::HtmlInputElement = speed_slider.dyn_into::<web_sys::HtmlInputElement>()?;
-
     let vorticity_slider = document().get_element_by_id("vorticity_slider").unwrap();
     let vorticity_slider: web_sys::HtmlInputElement = vorticity_slider.dyn_into::<web_sys::HtmlInputElement>()?;
 
@@ -98,10 +89,9 @@ pub fn start() -> Result<(), JsValue> {
     let subtract_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::SUB_FRAGMENT_SHADER)?;
     let bound_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::BOUND_FRAGMENT_SHADER)?;
     let press_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::PRESS_FRAGMENT_SHADER)?;
-    let colorize_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::COLORIZE_FRAGMENT_SHADER)?;
+    let colorize_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::COLORIZE_PRESSURE_FRAGMENT_SHADER)?;
     let obstacle_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::OBSTACLE_FRAGMENT_SHADER)?;
     let source_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::SOURCE_FRAGMENT_SHADER)?;
-    let force_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::FORCE_FRAGMENT_SHADER)?;
     let color_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::COLOR_FRAGMENT_SHADER)?;
     let vorticity_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::VORT_FRAGMENT_SHADER)?;
 
@@ -162,12 +152,6 @@ pub fn start() -> Result<(), JsValue> {
     let source_pass = render::RenderPass::new(&gl,
         [&standard_vert_shader, &source_frag_shader],
         vec!["pixel_size", "incoming_flow", "velocity_field"], "vertex_position",
-        &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
-    )?;
-
-    let force_pass = render::RenderPass::new(&gl,
-        [&standard_vert_shader, &force_frag_shader],
-        vec!["delta_t", "rho", "force", "impulse_pos", "velocity_field_texture"], "vertex_position",
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
     )?;
 

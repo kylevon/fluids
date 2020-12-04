@@ -10,14 +10,29 @@
       <div class="row"></div>
 
       <div class="row">
-        <canvas id="canvas" height="512" width="512" />
+        <canvas id="canvas" height="512" width="512">
         </canvas>
+      </div>
+      <div class="row">
+        <button type='button' id="dye_button">
+          Tinta
+        </button>
+        <button type='button' id="vel_button">
+          Velocidad
+        </button>
+        <button type='button' id="pre_button">
+          Presión
+        </button>
       </div>
       <select id="reset_flag" style="display: none;">
         <option value="0">A</option>
         <option value="1">B</option>
       </select>
-
+      <select id="visualization_mode" style="display: none;">
+        <option value="0">Dye</option>
+        <option value="1">Velocity</option>
+        <option value="2">Pressure</option>
+      </select>
          <div class="row">
           <form action="#">
               <h4>Simulation Variables</h4>
@@ -50,7 +65,7 @@
               <div class="col s6">
                 <div class="row"></div>
                 <div class="row"></div>
-                
+
                 <button type='button' id="reset_button">
                   Reset
                 </button>
@@ -79,12 +94,12 @@
           </form>
       </div>
     </div>
-    <script>       
+    <script>
         var rangeSlider = (function() {
         var slider = $('.range-slider'),
             range = $('[type=range]'),
             value = $('.range-slider__value');
-          
+
         slider.each(function() {
           range.on('input', function() {
             if ($(this).attr('id') == "viscocity_slider") $(this).next(value).html("1e" + this.value);
@@ -92,7 +107,7 @@
           });
         });
       });
-      
+
       rangeSlider();
     </script>
   </body>
