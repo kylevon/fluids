@@ -218,24 +218,24 @@ pub fn boundary(gl: &GL,
     (dst, vector_field)
 }
 
-pub fn colorize(gl: &GL,
-    colorize_pass:  &render::RenderPass,
+pub fn colorize_pressure(gl: &GL,
+    colorize_pressure_pass:  &render::RenderPass,
     pressure_field: Rc<texture::Framebuffer>,
     dst:            Rc<texture::Framebuffer>,
 ) -> Rc<texture::Framebuffer> {
     dst.bind(&gl);
-    colorize_pass.use_program(&gl);
+    colorize_pressure_pass.use_program(&gl);
 
-    gl.uniform1i(colorize_pass.uniforms["pressure_field"].as_ref(), 0);
+    gl.uniform1i(colorize_pressure_pass.uniforms["pressure_field"].as_ref(), 0);
 
     gl.active_texture(GL::TEXTURE0);
     gl.bind_texture(GL::TEXTURE_2D, Some(pressure_field.get_texture()));
 
-    gl.bind_buffer(GL::ARRAY_BUFFER, Some(&colorize_pass.vertex_buffer));
+    gl.bind_buffer(GL::ARRAY_BUFFER, Some(&colorize_pressure_pass.vertex_buffer));
     gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, 0, 0);
     gl.enable_vertex_attrib_array(0);
 
-    gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&colorize_pass.index_buffer));
+    gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&colorize_pressure_pass.index_buffer));
 
     gl.draw_elements_with_i32(GL::TRIANGLES, 6, GL::UNSIGNED_SHORT, 0);
     dst.unbind(&gl);

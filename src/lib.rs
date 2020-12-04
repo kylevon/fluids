@@ -77,6 +77,9 @@ pub fn start() -> Result<(), JsValue> {
     let reset_flag_element = document().get_element_by_id("reset_flag").unwrap();
     let reset_flag_element: web_sys::HtmlSelectElement = reset_flag_element.dyn_into::<web_sys::HtmlSelectElement>()?;
 
+    let visualization_mode_select = document().get_element_by_id("visualization_mode").unwrap();
+    let visualization_mode_select: web_sys::HtmlSelectElement = visualization_mode_select.dyn_into::<web_sys::HtmlSelectElement>()?;
+
     let width: i32 = canvas.width() as i32;
     let height: i32 = canvas.height() as i32;
     let gui = Rc::new(RefCell::new(gui::Gui::new(width as f32, height as f32)));
@@ -144,7 +147,7 @@ pub fn start() -> Result<(), JsValue> {
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
     )?;
 
-    let colorize_pass = render::RenderPass::new(&gl,
+    let colorize_pressure_pass = render::RenderPass::new(&gl,
         [&standard_vert_shader, &colorize_frag_shader],
         vec!["pressure_field"], "vertex_position",
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
@@ -223,6 +226,8 @@ pub fn start() -> Result<(), JsValue> {
 
         let reset_flag_value = reset_flag_element.selected_index();
 
+        let visualization_mode = visualization_mode_select.selected_index();
+
         if reset_flag_value != cur_reset_flag
         {
             src_color_field.delete_buffers(&gl);
@@ -236,38 +241,18 @@ pub fn start() -> Result<(), JsValue> {
             cur_reset_flag = reset_flag_value;
         }
 
-
-
         {
-            if gui.mouse_pressed {
-                // add forces
-                // ADD FORCE
+            if gui.mouse_pressed && visualization_mode == 0 {
                 let rho = 1e-3;
-                let speed = speed_slider.value_as_number() as f32;
-                let force = speed * gui.mouse_vec;
                 let impulse_pos = gui.mouse_pos;
-                let result = render_fluid::force(&gl, &force_pass,
-                    delta_t, rho, &force, &impulse_pos,
-                    Rc::clone(&src_velocity_field), Rc::clone(&dst_velocity_field));
 
-                src_velocity_field = result.0;
-                dst_velocity_field = result.1;
 
                 // add dye
-                let rand_checked = random_color.checked();
-                let selected_color = &splat_color.value()[1..];
-                let color_hex = hex::decode(selected_color).unwrap();
-                let mut r = color_hex[0] as f32 / 255.0;
-                let mut g = color_hex[1] as f32 / 255.0;
-                let mut b = color_hex[2] as f32 / 255.0;
-
-                if rand_checked {
-                    let now_sec = now as f32 * 0.25;
-                    let rand_color = rainbow_colors[(now_sec % rainbow_colors.len() as f32) as usize];
-                    r = rand_color.red;
-                    g = rand_color.green;
-                    b = rand_color.blue;
-                }
+                let now_sec = now as f32 * 0.25;
+                let rand_color = rainbow_colors[(now_sec % rainbow_colors.len() as f32) as usize];
+                let r = rand_color.red;
+                let g = rand_color.green;
+                let b = rand_color.blue;
 
                 let col = Vector3::new(r, g, b);
 
@@ -408,26 +393,32 @@ pub fn start() -> Result<(), JsValue> {
             dst_pressure_field = result.1;
 
             // compute its color
-            pressure_color_fb = render_fluid::colorize(&gl, &colorize_pass,
+            pressure_color_fb = render_fluid::colorize_pressure(&gl, &colorize_pressure_pass,
                 Rc::clone(&src_pressure_field),
                 Rc::clone(&pressure_color_fb));
-
-
         }
 
         {
-            // TODO: mix pressure and ink according to slider?
+            // Draw according to display mode
 
-            // [MIX]
+            if visualization_mode == 0
+            {
+                display_buffer = render_fluid::obstacle(&gl, &obstacle_pass,
+                    Rc::clone(&src_color_field),
+                    Rc::clone(&obstacle_field),
+                    Rc::clone(&display_buffer));
+            }
+            else if visualization_mode == 1
+            {
 
-
-
-
-            // add the obstacles
-            display_buffer = render_fluid::obstacle(&gl, &obstacle_pass,
-                Rc::clone(&src_color_field),
-                Rc::clone(&obstacle_field),
-                Rc::clone(&display_buffer));
+            }
+            else if visualization_mode == 2
+            {
+                display_buffer = render_fluid::obstacle(&gl, &obstacle_pass,
+                    Rc::clone(&pressure_color_fb),
+                    Rc::clone(&obstacle_field),
+                    Rc::clone(&display_buffer));
+            }
         }
 
         {
