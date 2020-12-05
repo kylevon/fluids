@@ -16,7 +16,6 @@ pub static COLORIZE_PRESSURE_FRAGMENT_SHADER:  &'static str = include_str!("./co
 pub static COLORIZE_VELOCITY_FRAGMENT_SHADER:  &'static str = include_str!("./colorize_velocity.frag");
 pub static OBSTACLE_FRAGMENT_SHADER:  &'static str = include_str!("./obstacle.frag");
 pub static SOURCE_FRAGMENT_SHADER:  &'static str = include_str!("./source.frag");
-pub static PRESS_FRAGMENT_SHADER:  &'static str = include_str!("./pressure.frag");
 pub static VORT_FRAGMENT_SHADER: &'static str = include_str!("./vorticity.frag");
 
 pub fn compile_shader(

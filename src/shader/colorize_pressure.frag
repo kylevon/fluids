@@ -19,7 +19,7 @@ void main()
     // presión en ese punto
     float p = texture2D(pressure_field, UV).x;
     // normalizada de -pi/2 a pi/2
-    p = atan(p);
+    p = atan(p * 1000.0);
     // de -0.5 a 0.5
     p /= PI;
     // de 0 a 1
