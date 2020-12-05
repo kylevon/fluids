@@ -65,8 +65,8 @@ pub fn start() -> Result<(), JsValue> {
     let vector_field_select = document().get_element_by_id("vector_field_select").unwrap();
     let _vector_field_select: web_sys::HtmlSelectElement = vector_field_select.dyn_into::<web_sys::HtmlSelectElement>()?;
 
-    let figure_select = document().get_element_by_id("figure_select").unwrap();
-    let _figure_select: web_sys::HtmlSelectElement = figure_select.dyn_into::<web_sys::HtmlSelectElement>()?;
+    let obstacle_select = document().get_element_by_id("figure_select").unwrap();
+    let obstacle_select: web_sys::HtmlSelectElement = obstacle_select.dyn_into::<web_sys::HtmlSelectElement>()?;
 
     let reset_flag_element = document().get_element_by_id("reset_flag").unwrap();
     let reset_flag_element: web_sys::HtmlSelectElement = reset_flag_element.dyn_into::<web_sys::HtmlSelectElement>()?;
@@ -179,15 +179,17 @@ pub fn start() -> Result<(), JsValue> {
 
     let vf_data = texture::make_constant_vector_field(width as f32, height as f32);
     let cb_data = texture::make_checkerboard_array(width, height);
-    let obstacle_field_data = texture::make_tube_obstacles(width as f32, height as f32);
+    let mut obstacle_field_data = texture::make_tube_obstacles(width as f32, height as f32);
+    texture::add_square_obstacle_center(&mut obstacle_field_data, width as i32, 64, 256, 32, 32);
 
 
     let mut cur_reset_flag = 0;
+    let mut cur_obstacle_type = 1;
 
     let mut src_velocity_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, vf_data.clone())?);
     let mut dst_velocity_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
 
-    let obstacle_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, obstacle_field_data.clone())?);
+    let mut obstacle_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, obstacle_field_data.clone())?);
 
     let mut src_pressure_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
     let mut dst_pressure_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
@@ -211,11 +213,15 @@ pub fn start() -> Result<(), JsValue> {
         let magnitude_scale = (vel_mag_slider.value_as_number() as f32) / 10.0;
         let delta_t = 1.0/60.0;
 
+        let obstacle_type = obstacle_select.selected_index();
+
         let reset_flag_value = reset_flag_element.selected_index();
 
         let visualization_mode = visualization_mode_select.selected_index();
 
-        if reset_flag_value != cur_reset_flag
+
+
+        if reset_flag_value != cur_reset_flag || obstacle_type != cur_obstacle_type
         {
             src_color_field.delete_buffers(&gl);
             src_velocity_field.delete_buffers(&gl);
@@ -226,6 +232,36 @@ pub fn start() -> Result<(), JsValue> {
             src_pressure_field = Rc::new(texture::Framebuffer::new(&gl, width, height).unwrap());
 
             cur_reset_flag = reset_flag_value;
+        }
+
+        if obstacle_type != cur_obstacle_type
+        {
+            let mut obstacle_field_data = texture::make_tube_obstacles(width as f32, height as f32);
+
+            if obstacle_type == 1
+            {
+                // Cuadrado
+                texture::add_square_obstacle_center(&mut obstacle_field_data, width as i32, 64, 256, 32, 32);
+            }
+            else if obstacle_type == 2
+            {
+                // Circulo
+                texture::add_circle_obstacle_center(&mut obstacle_field_data, width as i32, 64, 256, 16);
+            }
+            else if obstacle_type == 3
+            {
+                // Triángulo
+                texture::add_isosceles_triangle_obstacle_tip(&mut obstacle_field_data, width as i32, 48, 256, 32, 32);
+            }
+            else if obstacle_type == 4
+            {
+                // TODO
+                // Múltiples cuadrados? en Otra posicion? Agregar ifs y filas en el selector HTML segun corresponda
+            }
+
+            obstacle_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, obstacle_field_data.clone()).unwrap());
+
+            cur_obstacle_type = obstacle_type;
         }
 
         {

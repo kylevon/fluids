@@ -191,6 +191,86 @@ pub fn make_constant_vector_field(width: f32, height: f32) -> Vec<f32> {
     data
 }
 
+pub fn row_col_to_xyzw_index(y: i32, x: i32, width: i32) -> usize
+{
+    return 4 * (y * width + x) as usize;
+}
+
+pub fn add_square_obstacle(data: &mut Vec<f32>, vec_width: i32, x0: i32, y0: i32, w: i32, h: i32)
+{
+    // Pared izquierda
+    for y in y0+1..y0+h
+    {
+        let pixel_position = row_col_to_xyzw_index(y, x0, vec_width);
+        data[pixel_position + 0] = -1.0;
+    }
+    // Pared derecha
+    for y in y0+1..y0+h
+    {
+        let pixel_position = row_col_to_xyzw_index(y, x0 + w, vec_width);
+        data[pixel_position + 0] = 1.0;
+    }
+    // Pared superior
+    for x in x0+1..x0+w
+    {
+        let pixel_position = row_col_to_xyzw_index(y0, x, vec_width);
+        data[pixel_position + 1] = -1.0;
+    }
+    // Pared inferior
+    for x in x0+1..x0+w
+    {
+        let pixel_position = row_col_to_xyzw_index(y0 + h, x, vec_width);
+        data[pixel_position + 1] = 1.0;
+    }
+
+    let raiz_2_medios = 0.70710678118;
+
+    // Esquina inferior izquierda
+    let pixel_position = row_col_to_xyzw_index(y0, x0, vec_width);
+    data[pixel_position + 0] = -raiz_2_medios;
+    data[pixel_position + 1] = -raiz_2_medios;
+
+    // Esquina inferior derecha
+    let pixel_position = row_col_to_xyzw_index(y0, x0 + w, vec_width);
+    data[pixel_position + 0] = raiz_2_medios;
+    data[pixel_position + 1] = -raiz_2_medios;
+
+    // Esquina superior izquierda
+    let pixel_position = row_col_to_xyzw_index(y0 + h, x0, vec_width);
+    data[pixel_position + 0] = -raiz_2_medios;
+    data[pixel_position + 1] = raiz_2_medios;
+
+    // Esquina superior derecha
+    let pixel_position = row_col_to_xyzw_index(y0 + h, x0 + w, vec_width);
+    data[pixel_position + 0] = raiz_2_medios;
+    data[pixel_position + 1] = raiz_2_medios;
+
+    // Interior de la figura
+    for r in y0+1..y0+h
+    {
+        for c in x0+1..x0+w
+        {
+            let pixel_position = row_col_to_xyzw_index(r, c, vec_width);
+            data[pixel_position + 3] = 1.0;
+        }
+    }
+}
+
+pub fn add_square_obstacle_center(data: &mut Vec<f32>, vec_width: i32, xc: i32, yc: i32, w: i32, h: i32)
+{
+    add_square_obstacle(data, vec_width, xc - w/2, yc - h/2, w, h);
+}
+
+pub fn add_circle_obstacle_center(data: &mut Vec<f32>, vec_width: i32, yc: i32, xc: i32, r: i32)
+{
+    // TODO
+}
+
+pub fn add_isosceles_triangle_obstacle_tip(data: &mut Vec<f32>, vec_width: i32, tip_x: i32, tip_y: i32, h: i32, b: i32)
+{
+    // TODO
+}
+
 pub fn make_tube_obstacles(width: f32, height: f32) -> Vec<f32> {
     let mut data = Vec::with_capacity((width * height * 4.0) as usize);
     for r in 0..(height as i32){
@@ -206,88 +286,6 @@ pub fn make_tube_obstacles(width: f32, height: f32) -> Vec<f32> {
                 data.push(-1.0);
                 data.push(0.0);
                 data.push(0.0);
-            }
-            // else if _c == (width as i32) - 1 {
-            //     data.push(-1.0);
-            //     data.push(0.0);
-            //     data.push(0.0);
-            //     data.push(1.0);
-            // }
-            else if _c == 192
-            {
-                if r >= 192 && r <= 320
-                {
-                    data.push(-1.0);
-                    data.push(0.0);
-                    data.push(0.0);
-                    data.push(0.0);
-                }
-                else
-                {
-                    data.push(0.0);
-                    data.push(0.0);
-                    data.push(0.0);
-                    data.push(0.0);
-                }
-            }
-            else if _c == 320
-            {
-                if r >= 192 && r <= 320
-                {
-                    data.push(1.0);
-                    data.push(0.0);
-                    data.push(0.0);
-                    data.push(0.0);
-                }
-                else
-                {
-                    data.push(0.0);
-                    data.push(0.0);
-                    data.push(0.0);
-                    data.push(0.0);
-                }
-            }
-            else if r == 192
-            {
-                if _c >= 192 && _c <= 320
-                {
-                    data.push(0.0);
-                    data.push(-1.0);
-                    data.push(0.0);
-                    data.push(0.0);
-                }
-                else
-                {
-                    data.push(0.0);
-                    data.push(0.0);
-                    data.push(0.0);
-                    data.push(0.0);
-                }
-            }
-            else if r == 320
-            {
-                if _c >= 192 && _c <= 320
-                {
-                    data.push(0.0);
-                    data.push(1.0);
-                    data.push(0.0);
-                    data.push(0.0);
-                }
-                else
-                {
-                    data.push(0.0);
-                    data.push(0.0);
-                    data.push(0.0);
-                    data.push(0.0);
-                }
-            }
-            else if r > 192 && r < 320 && _c > 192 && _c < 320
-            {
-                // Interior del cubo
-                data.push(0.0);
-                data.push(0.0);
-                data.push(0.0);
-                data.push(1.0);
             }
             else {
                 data.push(0.0);
