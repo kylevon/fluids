@@ -43,6 +43,15 @@ $(document).ready(function()
     $(this).addClass("is-primary is-hovered");
     $("#circle_button").removeClass("is-primary is-hovered");
     $("#triangle_button").removeClass("is-primary is-hovered");
+    $("#nothing_button").removeClass("is-primary is-hovered");
+    $("#squares_button").removeClass("is-primary is-hovered");
+    $("#circles_button").removeClass("is-primary is-hovered");
+    $("#triangles_button").removeClass("is-primary is-hovered");
+    $("#mixed_1_button").removeClass("is-primary is-hovered");
+    $("#mixed_2_button").removeClass("is-primary is-hovered");
+    $("#mixed_3_button").removeClass("is-primary is-hovered");
+    $("#mixed_4_button").removeClass("is-primary is-hovered");
+    $("#mixed_5_button").removeClass("is-primary is-hovered");
   });
 
   $("#circle_button").click(function()
@@ -51,6 +60,15 @@ $(document).ready(function()
     $(this).addClass("is-primary is-hovered");
     $("#square_button").removeClass("is-primary is-hovered");
     $("#triangle_button").removeClass("is-primary is-hovered");
+    $("#nothing_button").removeClass("is-primary is-hovered");
+    $("#squares_button").removeClass("is-primary is-hovered");
+    $("#circles_button").removeClass("is-primary is-hovered");
+    $("#triangles_button").removeClass("is-primary is-hovered");
+    $("#mixed_1_button").removeClass("is-primary is-hovered");
+    $("#mixed_2_button").removeClass("is-primary is-hovered");
+    $("#mixed_3_button").removeClass("is-primary is-hovered");
+    $("#mixed_4_button").removeClass("is-primary is-hovered");
+    $("#mixed_5_button").removeClass("is-primary is-hovered");
   });
 
   $("#triangle_button").click(function()
@@ -59,6 +77,168 @@ $(document).ready(function()
     $(this).addClass("is-primary is-hovered");
     $("#square_button").removeClass("is-primary is-hovered");
     $("#circle_button").removeClass("is-primary is-hovered");
+    $("#nothing_button").removeClass("is-primary is-hovered");
+    $("#squares_button").removeClass("is-primary is-hovered");
+    $("#circles_button").removeClass("is-primary is-hovered");
+    $("#triangles_button").removeClass("is-primary is-hovered");
+    $("#mixed_1_button").removeClass("is-primary is-hovered");
+    $("#mixed_2_button").removeClass("is-primary is-hovered");
+    $("#mixed_3_button").removeClass("is-primary is-hovered");
+    $("#mixed_4_button").removeClass("is-primary is-hovered");
+    $("#mixed_5_button").removeClass("is-primary is-hovered");
+  });
+
+  $("#nothing_button").click(function()
+  {
+    $("#figure_select").val(4);
+    $(this).addClass("is-primary is-hovered");
+    $("#square_button").removeClass("is-primary is-hovered");
+    $("#circle_button").removeClass("is-primary is-hovered");
+    $("#triangle_button").removeClass("is-primary is-hovered");
+    $("#squares_button").removeClass("is-primary is-hovered");
+    $("#circles_button").removeClass("is-primary is-hovered");
+    $("#triangles_button").removeClass("is-primary is-hovered");
+    $("#mixed_1_button").removeClass("is-primary is-hovered");
+    $("#mixed_2_button").removeClass("is-primary is-hovered");
+    $("#mixed_3_button").removeClass("is-primary is-hovered");
+    $("#mixed_4_button").removeClass("is-primary is-hovered");
+    $("#mixed_5_button").removeClass("is-primary is-hovered");
+  });
+
+  $("#squares_button").click(function()
+  {
+    $("#figure_select").val(5);
+    $(this).addClass("is-primary is-hovered");
+    $("#square_button").removeClass("is-primary is-hovered");
+    $("#circle_button").removeClass("is-primary is-hovered");
+    $("#triangle_button").removeClass("is-primary is-hovered");
+    $("#nothing_button").removeClass("is-primary is-hovered");
+    $("#circles_button").removeClass("is-primary is-hovered");
+    $("#triangles_button").removeClass("is-primary is-hovered");
+    $("#mixed_1_button").removeClass("is-primary is-hovered");
+    $("#mixed_2_button").removeClass("is-primary is-hovered");
+    $("#mixed_3_button").removeClass("is-primary is-hovered");
+    $("#mixed_4_button").removeClass("is-primary is-hovered");
+    $("#mixed_5_button").removeClass("is-primary is-hovered");
+  });
+
+  $("#circles_button").click(function()
+  {
+    $("#figure_select").val(6);
+    $(this).addClass("is-primary is-hovered");
+    $("#square_button").removeClass("is-primary is-hovered");
+    $("#circle_button").removeClass("is-primary is-hovered");
+    $("#triangle_button").removeClass("is-primary is-hovered");
+    $("#nothing_button").removeClass("is-primary is-hovered");
+    $("#squares_button").removeClass("is-primary is-hovered");
+    $("#triangles_button").removeClass("is-primary is-hovered");
+    $("#mixed_1_button").removeClass("is-primary is-hovered");
+    $("#mixed_2_button").removeClass("is-primary is-hovered");
+    $("#mixed_3_button").removeClass("is-primary is-hovered");
+    $("#mixed_4_button").removeClass("is-primary is-hovered");
+    $("#mixed_5_button").removeClass("is-primary is-hovered");
+  });
+
+  $("#triangles_button").click(function()
+  {
+    $("#figure_select").val(7);
+    $(this).addClass("is-primary is-hovered");
+    $("#square_button").removeClass("is-primary is-hovered");
+    $("#circle_button").removeClass("is-primary is-hovered");
+    $("#triangle_button").removeClass("is-primary is-hovered");
+    $("#nothing_button").removeClass("is-primary is-hovered");
+    $("#squares_button").removeClass("is-primary is-hovered");
+    $("#circles_button").removeClass("is-primary is-hovered");
+    $("#mixed_1_button").removeClass("is-primary is-hovered");
+    $("#mixed_2_button").removeClass("is-primary is-hovered");
+    $("#mixed_3_button").removeClass("is-primary is-hovered");
+    $("#mixed_4_button").removeClass("is-primary is-hovered");
+    $("#mixed_5_button").removeClass("is-primary is-hovered");
+  });
+
+  $("#mixed_1_button").click(function()
+  {
+    $("#figure_select").val(8);
+    $(this).addClass("is-primary is-hovered");
+    $("#square_button").removeClass("is-primary is-hovered");
+    $("#circle_button").removeClass("is-primary is-hovered");
+    $("#triangle_button").removeClass("is-primary is-hovered");
+    $("#nothing_button").removeClass("is-primary is-hovered");
+    $("#squares_button").removeClass("is-primary is-hovered");
+    $("#circles_button").removeClass("is-primary is-hovered");
+    $("#triangles_button").removeClass("is-primary is-hovered");
+    $("#mixed_2_button").removeClass("is-primary is-hovered");
+    $("#mixed_3_button").removeClass("is-primary is-hovered");
+    $("#mixed_4_button").removeClass("is-primary is-hovered");
+    $("#mixed_5_button").removeClass("is-primary is-hovered");
+  });
+
+  $("#mixed_2_button").click(function()
+  {
+    $("#figure_select").val(9);
+    $(this).addClass("is-primary is-hovered");
+    $("#square_button").removeClass("is-primary is-hovered");
+    $("#circle_button").removeClass("is-primary is-hovered");
+    $("#triangle_button").removeClass("is-primary is-hovered");
+    $("#nothing_button").removeClass("is-primary is-hovered");
+    $("#squares_button").removeClass("is-primary is-hovered");
+    $("#circles_button").removeClass("is-primary is-hovered");
+    $("#triangles_button").removeClass("is-primary is-hovered");
+    $("#mixed_1_button").removeClass("is-primary is-hovered");
+    $("#mixed_3_button").removeClass("is-primary is-hovered");
+    $("#mixed_4_button").removeClass("is-primary is-hovered");
+    $("#mixed_5_button").removeClass("is-primary is-hovered");
+  });
+
+  $("#mixed_3_button").click(function()
+  {
+    $("#figure_select").val(10);
+    $(this).addClass("is-primary is-hovered");
+    $("#square_button").removeClass("is-primary is-hovered");
+    $("#circle_button").removeClass("is-primary is-hovered");
+    $("#triangle_button").removeClass("is-primary is-hovered");
+    $("#nothing_button").removeClass("is-primary is-hovered");
+    $("#squares_button").removeClass("is-primary is-hovered");
+    $("#circles_button").removeClass("is-primary is-hovered");
+    $("#triangles_button").removeClass("is-primary is-hovered");
+    $("#mixed_1_button").removeClass("is-primary is-hovered");
+    $("#mixed_2_button").removeClass("is-primary is-hovered");
+    $("#mixed_4_button").removeClass("is-primary is-hovered");
+    $("#mixed_5_button").removeClass("is-primary is-hovered");
+  });
+
+  $("#mixed_4_button").click(function()
+  {
+    $("#figure_select").val(11);
+    $(this).addClass("is-primary is-hovered");
+    $("#square_button").removeClass("is-primary is-hovered");
+    $("#circle_button").removeClass("is-primary is-hovered");
+    $("#triangle_button").removeClass("is-primary is-hovered");
+    $("#nothing_button").removeClass("is-primary is-hovered");
+    $("#squares_button").removeClass("is-primary is-hovered");
+    $("#circles_button").removeClass("is-primary is-hovered");
+    $("#triangles_button").removeClass("is-primary is-hovered");
+    $("#mixed_1_button").removeClass("is-primary is-hovered");
+    $("#mixed_2_button").removeClass("is-primary is-hovered");
+    $("#mixed_3_button").removeClass("is-primary is-hovered");
+    $("#mixed_5_button").removeClass("is-primary is-hovered");
+  });
+
+  $("#mixed_5_button").click(function()
+  {
+    $("#figure_select").val(12);
+    $(this).addClass("is-primary is-hovered");
+    $("#square_button").removeClass("is-primary is-hovered");
+    $("#circle_button").removeClass("is-primary is-hovered");
+    $("#triangle_button").removeClass("is-primary is-hovered");
+    $("#nothing_button").removeClass("is-primary is-hovered");
+    $("#squares_button").removeClass("is-primary is-hovered");
+    $("#circles_button").removeClass("is-primary is-hovered");
+    $("#triangles_button").removeClass("is-primary is-hovered");
+    $("#mixed_1_button").removeClass("is-primary is-hovered");
+    $("#mixed_2_button").removeClass("is-primary is-hovered");
+    $("#mixed_3_button").removeClass("is-primary is-hovered");
+    $("#mixed_4_button").removeClass("is-primary is-hovered");
   });
 
 });

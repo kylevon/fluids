@@ -255,6 +255,63 @@ pub fn add_square_obstacle(data: &mut Vec<f32>, vec_width: i32, x0: i32, y0: i32
     }
 }
 
+pub fn add_triangle_obstacle(data: &mut Vec<f32>, vec_width: i32, xc: i32, yc: i32, h: i32, b: i32)
+{
+    for x in 0..h
+    {
+        for y in 0..b
+        {
+            if x*b/2 <= ((y-b/2)*h)/2 && x*b/2 >= ((y-b/2)*h)/2 - 1
+            {
+                let pixel_position = row_col_to_xyzw_index(x + xc, y + yc, vec_width);
+                let h32 = h as f32;
+                let b32 = b as f32;
+                data[pixel_position + 0] = -h32/(h32*h32+b32*b32).sqrt();
+                data[pixel_position + 1] = -b32/(2.0*(h32*h32+b32*b32).sqrt());
+            }
+            else if x*b/2 <= -(y-b/2)*h/2 && x*b/2 >= -(y-b/2)*h/2 - 1
+            {
+                let pixel_position = row_col_to_xyzw_index(x + xc, y + yc, vec_width);
+                let h32 = h as f32;
+                let b32 = b as f32;
+                data[pixel_position + 0] = -h32/(h32*h32+b32*b32).sqrt();
+                data[pixel_position + 1] = b32/(2.0*(h32*h32+b32*b32).sqrt());
+            }
+            else if x == h/2
+            {
+                let pixel_position = row_col_to_xyzw_index(x + xc, y + yc, vec_width);
+                data[pixel_position + 1] = -1.0;
+            }
+            else if x*b/2 >= ((y-b/2)*h)/2 && x*b/2 >= -(y-b/2)*h/2 && x <= h/2
+            {
+                let pixel_position = row_col_to_xyzw_index(x + xc, y + yc, vec_width);
+                data[pixel_position + 3] = 1.0;
+            }
+        }
+    }
+}
+
+pub fn add_circle_obstacle(data: &mut Vec<f32>, vec_width: i32, x0: i32, y0: i32, r: i32)
+{
+    for x in 0..2*r
+    {
+        for y in 0..2*r
+        {
+            if (r - x)*(r - x) + (r - y)*(r - y) >= (r)*(r) && (r - x)*(r - x) + (r - y)*(r - y) <= (r+1)*(r+1)
+            {
+                let pixel_position = row_col_to_xyzw_index(x + x0, y + y0, vec_width);
+                data[pixel_position + 0] = (x - r) as f32 / r as f32; 
+                data[pixel_position + 1] = (y - r) as f32 / r as f32; 
+            }
+            else if (r - x)*(r - x) + (r - y)*(r - y) < r*r
+            {
+                let pixel_position = row_col_to_xyzw_index(x + x0, y + y0, vec_width);
+                data[pixel_position + 3] = 1.0;
+            }
+        }
+    }
+}
+
 pub fn add_square_obstacle_center(data: &mut Vec<f32>, vec_width: i32, xc: i32, yc: i32, w: i32, h: i32)
 {
     add_square_obstacle(data, vec_width, xc - w/2, yc - h/2, w, h);
@@ -262,13 +319,52 @@ pub fn add_square_obstacle_center(data: &mut Vec<f32>, vec_width: i32, xc: i32, 
 
 pub fn add_circle_obstacle_center(data: &mut Vec<f32>, vec_width: i32, yc: i32, xc: i32, r: i32)
 {
-    // TODO
+    add_circle_obstacle(data, vec_width, xc - r, yc - r, r);
 }
 
-pub fn add_isosceles_triangle_obstacle_tip(data: &mut Vec<f32>, vec_width: i32, tip_x: i32, tip_y: i32, h: i32, b: i32)
+pub fn add_isosceles_triangle_obstacle_tip(data: &mut Vec<f32>, vec_width: i32, xc: i32, yc: i32, h: i32, b: i32)
 {
-    // TODO
+    add_triangle_obstacle(data, vec_width, xc, yc, h, b);
 }
+
+pub fn add_nothing(data: &mut Vec<f32>, vec_width: i32, tip_x: i32, tip_y: i32, h: i32, b: i32)
+{
+}
+
+pub fn add_squares_obstacle_tip(data: &mut Vec<f32>, vec_width: i32, tip_x: i32, tip_y: i32, h: i32, b: i32)
+{
+    add_circle_obstacle(data, vec_width, tip_x - h, tip_y - h, h);
+}
+
+pub fn add_circles_obstacle_tip(data: &mut Vec<f32>, vec_width: i32, tip_x: i32, tip_y: i32, h: i32, b: i32)
+{
+}
+
+pub fn add_triangles_obstacle_tip(data: &mut Vec<f32>, vec_width: i32, tip_x: i32, tip_y: i32, h: i32, b: i32)
+{
+}
+
+pub fn add_mix_1_obstacle_tip(data: &mut Vec<f32>, vec_width: i32, tip_x: i32, tip_y: i32, h: i32, b: i32)
+{
+}
+
+pub fn add_mix_2_obstacle_tip(data: &mut Vec<f32>, vec_width: i32, tip_x: i32, tip_y: i32, h: i32, b: i32)
+{
+}
+
+pub fn add_mix_3_obstacle_tip(data: &mut Vec<f32>, vec_width: i32, tip_x: i32, tip_y: i32, h: i32, b: i32)
+{
+}
+
+pub fn add_mix_4_obstacle_tip(data: &mut Vec<f32>, vec_width: i32, tip_x: i32, tip_y: i32, h: i32, b: i32)
+{
+}
+
+pub fn add_mix_5_obstacle_tip(data: &mut Vec<f32>, vec_width: i32, tip_x: i32, tip_y: i32, h: i32, b: i32)
+{
+}
+
+
 
 pub fn clear(data: &mut Vec<f32>)
 {

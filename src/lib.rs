@@ -252,12 +252,57 @@ pub fn start() -> Result<(), JsValue> {
             else if obstacle_type == 1
             {
                 // Circulo
-                texture::add_circle_obstacle_center(&mut obstacle_field_data, width as i32, 64, 256, 16);
+                texture::add_circle_obstacle_center(&mut obstacle_field_data, width as i32, 64 + obstacle_size/2, 256, obstacle_size/2);
             }
             else if obstacle_type == 2
             {
                 // Triángulo
-                texture::add_isosceles_triangle_obstacle_tip(&mut obstacle_field_data, width as i32, 48, 256, 32, 32);
+                texture::add_isosceles_triangle_obstacle_tip(&mut obstacle_field_data, width as i32, 256 - obstacle_size/2, 50, obstacle_size, obstacle_size);
+            }
+            else if obstacle_type == 3
+            {
+                // Nada
+                texture::add_nothing(&mut obstacle_field_data, width as i32, 48, 256, 32, 32);
+            }
+            else if obstacle_type == 4
+            {
+                // 2 cuadrados
+                texture::add_squares_obstacle_tip(&mut obstacle_field_data, width as i32, 48, 256, 32, 32);
+            }
+            else if obstacle_type == 5
+            {
+                // 2 circulos
+                texture::add_circles_obstacle_tip(&mut obstacle_field_data, width as i32, 48, 256, 32, 32);
+            }
+            else if obstacle_type == 6
+            {
+                // 2 triangulos
+                texture::add_triangles_obstacle_tip(&mut obstacle_field_data, width as i32, 48, 256, 32, 32);
+            }
+            else if obstacle_type == 7
+            {
+                // mix 1
+                texture::add_mix_1_obstacle_tip(&mut obstacle_field_data, width as i32, 48, 256, 32, 32);
+            }
+            else if obstacle_type == 8
+            {
+                // mix 2
+                texture::add_mix_2_obstacle_tip(&mut obstacle_field_data, width as i32, 48, 256, 32, 32);
+            }
+            else if obstacle_type == 9
+            {
+                // mix 3
+                texture::add_mix_3_obstacle_tip(&mut obstacle_field_data, width as i32, 48, 256, 32, 32);
+            }
+            else if obstacle_type == 10
+            {
+                // mix 4
+                texture::add_mix_4_obstacle_tip(&mut obstacle_field_data, width as i32, 48, 256, 32, 32);
+            }
+            else if obstacle_type == 11
+            {
+                // mix 5
+                texture::add_mix_5_obstacle_tip(&mut obstacle_field_data, width as i32, 48, 256, 32, 32);
             }
 
             obstacle_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, obstacle_field_data.clone()).unwrap());
