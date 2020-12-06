@@ -271,23 +271,48 @@ pub fn add_isosceles_triangle_obstacle_tip(data: &mut Vec<f32>, vec_width: i32, 
     // TODO
 }
 
-pub fn make_tube_obstacles(width: f32, height: f32) -> Vec<f32> {
-    let mut data = Vec::with_capacity((width * height * 4.0) as usize);
-    for r in 0..(height as i32){
-        for _c in 0..(width as i32) {
-            if r == 0 {
+pub fn clear(data: &mut Vec<f32>)
+{
+    for i in data.iter_mut()
+    {
+        *i = 0.0;
+    }
+}
+
+pub fn add_tube_obstacles(data: &mut Vec<f32>, width: i32, height: i32)
+{
+    for x in 0..width
+    {
+        let pixel_position = row_col_to_xyzw_index(0, x, width);
+        data[pixel_position + 1] = 1.0;
+
+        let pixel_position = row_col_to_xyzw_index(height - 1, x, width);
+        data[pixel_position + 1] = -1.0;
+    }
+}
+
+pub fn make_tube_obstacles(width: i32, height: i32) -> Vec<f32> {
+    let mut data = Vec::with_capacity((width * height * 4) as usize);
+    for r in 0..height
+    {
+        for _c in 0..width
+        {
+            if r == 0
+            {
                 data.push(0.0);
                 data.push(1.0);
                 data.push(0.0);
                 data.push(0.0);
             }
-            else if r == (height as i32) - 1 {
+            else if r == (height as i32) - 1
+            {
                 data.push(0.0);
                 data.push(-1.0);
                 data.push(0.0);
                 data.push(0.0);
             }
-            else {
+            else
+            {
                 data.push(0.0);
                 data.push(0.0);
                 data.push(0.0);

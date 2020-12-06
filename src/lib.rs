@@ -62,6 +62,9 @@ pub fn start() -> Result<(), JsValue> {
     let influx_slider = document().get_element_by_id("influx_slider").unwrap();
     let influx_slider: web_sys::HtmlInputElement = influx_slider.dyn_into::<web_sys::HtmlInputElement>()?;
 
+    let obstacle_slider = document().get_element_by_id("obstacle_slider").unwrap();
+    let obstacle_slider: web_sys::HtmlInputElement = obstacle_slider.dyn_into::<web_sys::HtmlInputElement>()?;
+
     let obstacle_select = document().get_element_by_id("figure_select").unwrap();
     let obstacle_select: web_sys::HtmlSelectElement = obstacle_select.dyn_into::<web_sys::HtmlSelectElement>()?;
 
@@ -176,7 +179,7 @@ pub fn start() -> Result<(), JsValue> {
 
     let vf_data = texture::make_constant_vector_field(width as f32, height as f32);
     let cb_data = texture::make_checkerboard_array(width, height);
-    let mut obstacle_field_data = texture::make_tube_obstacles(width as f32, height as f32);
+    let mut obstacle_field_data = texture::make_tube_obstacles(width, height);
     texture::add_square_obstacle_center(&mut obstacle_field_data, width as i32, 64, 256, 32, 32);
 
 
@@ -203,6 +206,8 @@ pub fn start() -> Result<(), JsValue> {
 
     let rainbow_colors = texture::get_rainbow_array();
 
+    let mut cur_obstacle_size = 32;
+
     let mainloop: Box<dyn FnMut(i32)> = Box::new(move |now| {
         let gui = gui.borrow();
 
@@ -212,6 +217,8 @@ pub fn start() -> Result<(), JsValue> {
         let influx_angle = (influx_slider.value_as_number() as f32).to_radians();
 
         let obstacle_type = obstacle_select.selected_index();
+
+        let obstacle_size = obstacle_slider.value_as_number() as i32;
 
         let reset_flag_value = reset_flag_element.selected_index();
 
@@ -232,14 +239,15 @@ pub fn start() -> Result<(), JsValue> {
             cur_reset_flag = reset_flag_value;
         }
 
-        if obstacle_type != cur_obstacle_type
+        if obstacle_type != cur_obstacle_type || obstacle_size != cur_obstacle_size
         {
-            let mut obstacle_field_data = texture::make_tube_obstacles(width as f32, height as f32);
+            texture::clear(&mut obstacle_field_data);
+            texture::add_tube_obstacles(&mut obstacle_field_data, width, height);
 
             if obstacle_type == 0
             {
                 // Cuadrado
-                texture::add_square_obstacle_center(&mut obstacle_field_data, width as i32, 64, 256, 32, 32);
+                texture::add_square_obstacle_center(&mut obstacle_field_data, width as i32, 64 + obstacle_size / 2, 256, obstacle_size, obstacle_size);
             }
             else if obstacle_type == 1
             {
@@ -255,6 +263,7 @@ pub fn start() -> Result<(), JsValue> {
             obstacle_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, obstacle_field_data.clone()).unwrap());
 
             cur_obstacle_type = obstacle_type;
+            cur_obstacle_size = obstacle_size;
         }
 
         {
