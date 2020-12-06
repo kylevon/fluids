@@ -15,19 +15,18 @@ body
   width: 33.333333%;
 }
 
-/* .footer
-{
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-} */
-
 #reset_container
 {
   height: 100%;
 }
 
 #reset_button
+{
+  width: 100%;
+  margin: 0px;
+}
+
+#sabermas_button
 {
   width: 100%;
   margin: 0px;
