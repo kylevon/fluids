@@ -50,17 +50,17 @@ pub fn start() -> Result<(), JsValue> {
     let canvas = document().get_element_by_id("canvas").unwrap();
     let canvas: web_sys::HtmlCanvasElement = canvas.dyn_into::<web_sys::HtmlCanvasElement>()?;
 
-    let vel_mag_slider = document().get_element_by_id("magnitude_slider").unwrap();
-    let vel_mag_slider: web_sys::HtmlInputElement = vel_mag_slider.dyn_into::<web_sys::HtmlInputElement>()?;
-
     let jacobi_slider = document().get_element_by_id("jacobi_slider").unwrap();
     let jacobi_slider: web_sys::HtmlInputElement = jacobi_slider.dyn_into::<web_sys::HtmlInputElement>()?;
 
-    let viscocity_slider = document().get_element_by_id("viscocity_slider").unwrap();
-    let viscocity_slider: web_sys::HtmlInputElement = viscocity_slider.dyn_into::<web_sys::HtmlInputElement>()?;
+    let viscosity_slider = document().get_element_by_id("viscosity_slider").unwrap();
+    let viscosity_slider: web_sys::HtmlInputElement = viscosity_slider.dyn_into::<web_sys::HtmlInputElement>()?;
 
     let vorticity_slider = document().get_element_by_id("vorticity_slider").unwrap();
     let vorticity_slider: web_sys::HtmlInputElement = vorticity_slider.dyn_into::<web_sys::HtmlInputElement>()?;
+
+    let influx_slider = document().get_element_by_id("influx_slider").unwrap();
+    let influx_slider: web_sys::HtmlInputElement = influx_slider.dyn_into::<web_sys::HtmlInputElement>()?;
 
     let obstacle_select = document().get_element_by_id("figure_select").unwrap();
     let obstacle_select: web_sys::HtmlSelectElement = obstacle_select.dyn_into::<web_sys::HtmlSelectElement>()?;
@@ -140,7 +140,7 @@ pub fn start() -> Result<(), JsValue> {
 
     let colorize_velocity_pass = render::RenderPass::new(&gl,
         [&standard_vert_shader, &colorize_velocity_frag_shader],
-        vec!["velocity_field", "magnitude_scale"], "vertex_position",
+        vec!["velocity_field"], "vertex_position",
         &geometry::QUAD_VERTICES, &geometry::QUAD_INDICES,
     )?;
 
@@ -207,8 +207,9 @@ pub fn start() -> Result<(), JsValue> {
         let gui = gui.borrow();
 
         let iter = jacobi_slider.value_as_number() as usize;
-        let magnitude_scale = (vel_mag_slider.value_as_number() as f32) / 10.0;
         let delta_t = 1.0/60.0;
+
+        let influx_angle = (influx_slider.value_as_number() as f32).to_radians();
 
         let obstacle_type = obstacle_select.selected_index();
 
@@ -218,7 +219,7 @@ pub fn start() -> Result<(), JsValue> {
 
 
 
-        if reset_flag_value != cur_reset_flag || obstacle_type != cur_obstacle_type
+        if reset_flag_value != cur_reset_flag
         {
             src_color_field.delete_buffers(&gl);
             src_velocity_field.delete_buffers(&gl);
@@ -235,17 +236,17 @@ pub fn start() -> Result<(), JsValue> {
         {
             let mut obstacle_field_data = texture::make_tube_obstacles(width as f32, height as f32);
 
-            if obstacle_type == 1
+            if obstacle_type == 0
             {
                 // Cuadrado
                 texture::add_square_obstacle_center(&mut obstacle_field_data, width as i32, 64, 256, 32, 32);
             }
-            else if obstacle_type == 2
+            else if obstacle_type == 1
             {
                 // Circulo
                 texture::add_circle_obstacle_center(&mut obstacle_field_data, width as i32, 64, 256, 16);
             }
-            else if obstacle_type == 3
+            else if obstacle_type == 2
             {
                 // Triángulo
                 texture::add_isosceles_triangle_obstacle_tip(&mut obstacle_field_data, width as i32, 48, 256, 32, 32);
@@ -297,8 +298,8 @@ pub fn start() -> Result<(), JsValue> {
         {
             // viscuous diffusion
             // // DIFFUSE
-            let viscocity = (10.0_f32).powf(viscocity_slider.value_as_number() as f32);
-            let alpha   = delta_x.powf(2.0) / (viscocity * delta_t);
+            let viscosity = (10.0_f32).powf(viscosity_slider.value_as_number() as f32);
+            let alpha   = delta_x.powf(2.0) / (viscosity * delta_t);
             let r_beta  = 1.0/(4.0 + alpha);
 
             let bufs = [&src_velocity_field, &dst_velocity_field];
@@ -371,7 +372,7 @@ pub fn start() -> Result<(), JsValue> {
 
         {
             // set velocity of incoming flow
-            let incoming = Vector2::new(1.0, 0.0);
+            let incoming = Vector2::new(influx_angle.cos(), influx_angle.sin());
 
             let result = render_fluid::source(&gl, &source_pass,
                 delta_x,
@@ -410,7 +411,6 @@ pub fn start() -> Result<(), JsValue> {
             {
                 velocity_color_field = render_fluid::colorize_velocity(&gl,
                     &colorize_velocity_pass,
-                    magnitude_scale,
                     Rc::clone(&src_velocity_field),
                     Rc::clone(&velocity_color_field));
 

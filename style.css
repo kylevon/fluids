@@ -15,21 +15,22 @@ body
   width: 33.333333%;
 }
 
-.footer
+/* .footer
 {
   position: absolute;
   bottom: 0;
   width: 100%;
-}
+} */
 
 #reset_container
 {
-  padding-top: 20px;
+  height: 100%;
 }
 
 #reset_button
 {
   width: 100%;
+  margin: 0px;
 }
 
 canvas {
@@ -43,6 +44,11 @@ canvas {
 .has-addons
 {
   padding-top: 10pt;
+}
+
+.columns:not(:last-child)
+{
+  margin-bottom: 0px;
 }
 
 .slider {

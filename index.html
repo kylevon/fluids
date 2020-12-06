@@ -6,6 +6,7 @@
     <title>RoundFlow</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
     <link rel="stylesheet" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   </head>
   <body>
   <section class="hero is-primary is-small">
@@ -30,17 +31,43 @@
             <div class="tile is-ancestor">
               <div class="tile is-parent">
                 <div class="tile is-child box">
-                  <form>
                     <p>Cantidad de iteraciones</p>
-                    <input class="slider" id="jacobi_slider" type="range" min="10" max="50" value="20"/>
+                    <div class="columns">
+                      <div class="column is-10">
+                        <input class="slider" id="jacobi_slider" type="range" min="10" max="50" value="20"/>
+                      </div>
+                      <div class="column">
+                        <p id="jacobi_data">20</p>
+                      </div>
+                    </div>
                     <p>Viscosidad</p>
-                    <input class="slider" id="viscocity_slider" type="range" min="-9" max="9" value="-6"/>
+                    <div class="columns">
+                      <div class="column is-10">
+                        <input class="slider" id="viscosity_slider" type="range" min="-9" max="9" value="-6"/>
+                      </div>
+                      <div class="column">
+                        <p id="viscosity_data">1e-6</p>
+                      </div>
+                    </div>
                     <p>Vorticidad</p>
-                    <input class="slider" id="vorticity_slider" type="range" min="0" max="50" value="10"/>
+                    <div class="columns">
+                      <div class="column is-10">
+                        <input class="slider" id="vorticity_slider" type="range" min="0" max="50" value="10"/>
+                      </div>
+                      <div class="column">
+                        <p id="vorticity_data">10</p>
+                      </div>
+                    </div>
                     <p>Dirección del flujo entrante</p>
-                    <input class="slider" step="1" min="0" max="100" value="50" type="range">
-                  </form>
-                </div>
+                    <div class="columns">
+                      <div class="column is-10">
+                        <input class="slider" id="influx_slider" type="range" step="1" min="-15" max="15" value="0" >
+                      </div>
+                      <div class="column">
+                        <p id="influx_data">0°</p>
+                      </div>
+                    </div>
+                  </div>
               </div>
               <div class="tile is-parent">
                 <div class="tile is-child box">
@@ -57,11 +84,18 @@
                     </button>
                   </div>
                   <p>Tamaño del obstáculo</p>
-                  <input class="slider" id="magnitude_slider" type="range" min="10" max="100" value="60"/>
+                  <div class="columns">
+                    <div class="column is-10">
+                      <input class="slider" id="obstacle_slider" type="range" min="8" max="384" value="32"/>
+                    </div>
+                    <div class="column">
+                      <p id="obstacle_data">32</p>
+                    </div>
+                  </div>
                   <select id="figure_select" style="display: none;">
-                    <option value="1" selected>Square</option>
-                    <option value="2">Circle</option>
-                    <option value="3">Triangle</option>
+                    <option value="0">Square</option>
+                    <option value="1">Circle</option>
+                    <option value="2">Triangle</option>
                   </select>
                 </div>
               </div>
@@ -72,10 +106,10 @@
                 <div class="tile is-child box">
                   <p>Mostrar</p>
                   <div class="buttons has-addons is-centered">
-                    <button class="button" id="dye_button">
+                    <button class="button is-primary is-hovered" id="dye_button">
                       Tinta
                     </button>
-                    <button class="button is-primary is-hovered" id="vel_button">
+                    <button class="button" id="vel_button">
                       Velocidad
                     </button>
                     <button class="button" id="pre_button">
@@ -90,10 +124,19 @@
                 </div>
               </div>
               <div class="tile is-parent">
-                <div class="tile is-child box">
-                  <p>Escala de intensidad</p>
-                  <input class="slider" step="1" min="0" max="100" value="50" type="range">
-                  <div id="reset_container" class="buttons is-centered">
+                <div class="tile is-child">
+
+                  <!-- <p>Escala de intensidad</p> -->
+                  <div class="columns" style="display: none;">
+                    <div class="column is-10">
+                      <input id="magnitude_slider" class="slider" min="1" max="10" value="1" type="range">
+                    </div>
+                    <div class="column">
+                      <p id="magnitude_data">1</p>
+                    </div>
+                  </div>
+
+                  <div id="reset_container" class="buttons is-vcentered is-centered">
                     <button class="button is-danger is-hovered" id="reset_button">
                       Reiniciar Simulación
                     </button>
