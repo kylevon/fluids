@@ -62,9 +62,6 @@ pub fn start() -> Result<(), JsValue> {
     let vorticity_slider = document().get_element_by_id("vorticity_slider").unwrap();
     let vorticity_slider: web_sys::HtmlInputElement = vorticity_slider.dyn_into::<web_sys::HtmlInputElement>()?;
 
-    let vector_field_select = document().get_element_by_id("vector_field_select").unwrap();
-    let _vector_field_select: web_sys::HtmlSelectElement = vector_field_select.dyn_into::<web_sys::HtmlSelectElement>()?;
-
     let obstacle_select = document().get_element_by_id("figure_select").unwrap();
     let obstacle_select: web_sys::HtmlSelectElement = obstacle_select.dyn_into::<web_sys::HtmlSelectElement>()?;
 
@@ -78,7 +75,8 @@ pub fn start() -> Result<(), JsValue> {
     let height: i32 = canvas.height() as i32;
     let gui = Rc::new(RefCell::new(gui::Gui::new(width as f32, height as f32)));
 
-    gui::attach_mouse_handlers(&canvas, Rc::clone(&gui), canvas.offset_left() as f32, canvas.offset_top() as f32)?;
+    let bound_rect = canvas.get_bounding_client_rect();
+    gui::attach_mouse_handlers(&canvas, Rc::clone(&gui), bound_rect.left() as f32, bound_rect.top() as f32)?;
 
     let gl = canvas.get_context("webgl")?.unwrap().dyn_into::<GL>()?;
     gl.get_extension("OES_texture_float")?;
@@ -91,7 +89,6 @@ pub fn start() -> Result<(), JsValue> {
     let divergence_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::DIVERGE_FRAGMENT_SHADER)?;
     let subtract_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::SUB_FRAGMENT_SHADER)?;
     let bound_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::BOUND_FRAGMENT_SHADER)?;
-    // let press_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::PRESS_FRAGMENT_SHADER)?;
     let colorize_pressure_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::COLORIZE_PRESSURE_FRAGMENT_SHADER)?;
     let colorize_velocity_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::COLORIZE_VELOCITY_FRAGMENT_SHADER)?;
     let obstacle_frag_shader = shader::compile_shader(&gl, GL::FRAGMENT_SHADER, shader::OBSTACLE_FRAGMENT_SHADER)?;
@@ -184,7 +181,7 @@ pub fn start() -> Result<(), JsValue> {
 
 
     let mut cur_reset_flag = 0;
-    let mut cur_obstacle_type = 1;
+    let mut cur_obstacle_type = 0;
 
     let mut src_velocity_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, vf_data.clone())?);
     let mut dst_velocity_field = Rc::new(texture::Framebuffer::new(&gl, width, height)?);
@@ -252,11 +249,6 @@ pub fn start() -> Result<(), JsValue> {
             {
                 // Triángulo
                 texture::add_isosceles_triangle_obstacle_tip(&mut obstacle_field_data, width as i32, 48, 256, 32, 32);
-            }
-            else if obstacle_type == 4
-            {
-                // TODO
-                // Múltiples cuadrados? en Otra posicion? Agregar ifs y filas en el selector HTML segun corresponda
             }
 
             obstacle_field = Rc::new(texture::Framebuffer::create_with_data(&gl, width, height, obstacle_field_data.clone()).unwrap());

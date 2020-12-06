@@ -37,6 +37,7 @@ version = "0.3.6"
 features = [
   "Document",
   "Element",
+  "DomRect",
   "HtmlCanvasElement",
   "HtmlInputElement",
   "HtmlSelectElement",
