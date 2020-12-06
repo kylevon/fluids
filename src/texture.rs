@@ -153,13 +153,12 @@ pub fn make_checkerboard_array(width: i32, height: i32) -> Vec<f32> {
     let mut data = Vec::with_capacity((width * height * 4) as usize);
 
     let block_size = width/16;
-    for x in 0..width {
-        for y in 0..height {
-            let x_step = x/block_size;
+    for y in 0..height {
+        for x in 0..width {
             let y_step = y/block_size;
 
             let mut val = 0.0;
-            if (x_step + y_step) % 2 == 0 {
+            if (y_step) % 2 == 0 && x == 0 {
                 val = 1.0;
             }
 
