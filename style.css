@@ -79,3 +79,7 @@ canvas {
   background: #ffffff;
   cursor: pointer;
 }
+
+img {
+  width: 100%;
+}
